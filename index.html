@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freight Transport Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        header {
+            background-color: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        main {
+            margin-top: 20px;
+        }
+        section {
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Freight Transport Management System (FTMS)</h1>
+        <p>Manage shipments, fleet, and customer relationships efficiently.</p>
+    </header>
+    <main>
+        <section>
+            <h2>Features</h2>
+            <ul>
+                <li>Shipment Management</li>
+                <li>Fleet and Resource Management</li>
+                <li>Customer Management and Billing</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Technology Stack</h2>
+            <ul>
+                <li>Backend: Java + Spring Boot</li>
+                <li>Frontend: React SPA</li>
+                <li>Database: PostgreSQL</li>
+                <li>Object Storage: S3</li>
+                <li>Message Queue: RabbitMQ/Kafka</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Sample Mermaid Diagram</h2>
+            <pre>
+graph TB
+webClient["Web Client"] --> backend["Backend"]
+backend --> db["PostgreSQL"]
+backend --> objectStorage["Object Storage"]
+backend --> messageQueue["Message Queue"]
+            </pre>
+        </section>
+    </main>
+</body>
+</html>
