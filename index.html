@@ -3,533 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTMS - C4 Architecture Diagram</title>
+    <title>Customer Management - Activity Diagram</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
             padding: 20px;
-            overflow: hidden;
-        }
-
-        #canvas {
-            position: relative;
-            width: 100%;
-            height: calc(100vh - 120px);
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .header p {
-            font-size: 1rem;
-            opacity: 0.9;
-            margin-top: 8px;
-        }
-
-        .box {
-            position: absolute;
-            padding: 24px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            cursor: default;
-            user-select: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            z-index: 10;
-            min-width: 160px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            text-align: center;
-        }
-
-        .box:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .box-emoji {
-            font-size: 2.5rem;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .box-header {
-            font-size: 1rem;
-            margin-bottom: 4px;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-        }
-
-        .box-description {
-            font-size: 0.75rem;
-            opacity: 0.85;
-            line-height: 1.3;
-            font-weight: 500;
-        }
-
-        /* Actor styles */
-        .actor {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            width: 140px;
-        }
-
-        /* FTMS main block */
-        .ftms-main {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            width: 200px;
-            padding: 32px 24px;
-        }
-
-        /* Component styles */
-        .component {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            width: 180px;
-        }
-
-        /* Infrastructure styles */
-        .infrastructure {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            color: #1e293b;
-            width: 160px;
-        }
-
-        /* Clickable indicator */
-        .clickable {
-            cursor: pointer;
-        }
-
-        .clickable:hover {
-            transform: translateY(-5px) scale(1.03);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-        }
-
-        .clickable .box-description::after {
-            content: " 👆";
-        }
-
-        /* Level-based visibility */
-        .box {
-            display: none;
-        }
-
-        .box.visible {
-            display: flex;
-        }
-
-        /* Context (background) items */
-        .box.context {
-            opacity: 0.25;
-            pointer-events: none;
-            transform: scale(0.95);
-        }
-
-        /* SVG lines */
-        #lines-svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .connection-line {
-            stroke-width: 2.5;
-            stroke-dasharray: 8, 4;
-            fill: none;
-            opacity: 0.7;
-        }
-
-        .arrow {
-            opacity: 0.7;
-        }
-
-        /* Navigation controls */
-        .nav-controls {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            display: flex;
-            gap: 16px;
             align-items: center;
-            background: rgba(255, 255, 255, 0.98);
-            padding: 12px 24px;
-            border-radius: 10px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
         }
-
-        .back-button {
-            background: #667eea;
-            padding: 8px 18px;
-            border-radius: 6px;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-            display: none;
-            font-size: 0.875rem;
+        .container {
+            background: white;
+            padding: 0;
+            border: 2px solid #333;
+            max-width: 1400px;
+            width: 100%;
         }
-
-        .back-button:hover {
-            background: #5568d3;
+        .header {
+            background-color: #fef7e6;
+            border-bottom: 1px solid #333;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 13px;
         }
-
-        .back-button.visible {
+        svg {
             display: block;
+            width: 100%;
+            height: auto;
         }
-
-        .breadcrumb {
-            font-weight: 600;
-            color: #1e293b;
-            font-size: 0.938rem;
+        .activity {
+            fill: #fef7e6;
+            stroke: #8b7355;
+            stroke-width: 2;
         }
-
-        .breadcrumb span {
-            color: #667eea;
+        .decision {
+            fill: #fef7e6;
+            stroke: #8b7355;
+            stroke-width: 2;
         }
-
-        /* Fade animations */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95) translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+        .swimlane {
+            fill: none;
+            stroke: #999;
+            stroke-width: 1;
         }
-
-        .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
+        .swimlane-header {
+            fill: #e8e8e8;
+            stroke: #999;
+            stroke-width: 1;
         }
-
-        /* Instructions */
-        .instructions {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.98);
-            padding: 14px 28px;
-            border-radius: 10px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            font-size: 0.875rem;
-            text-align: center;
-            max-width: 90%;
+        .flow {
+            stroke: black;
+            stroke-width: 1.5;
+            fill: none;
+            marker-end: url(#arrowhead);
         }
-
-        .instructions strong {
-            color: #667eea;
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.938rem;
+        .start-end {
+            fill: black;
+            stroke: black;
+            stroke-width: 2;
+        }
+        .group-boundary {
+            fill: none;
+            stroke: #666;
+            stroke-width: 2;
+            stroke-dasharray: 8,4;
+        }
+        .exception-end {
+            fill: white;
+            stroke: black;
+            stroke-width: 2;
+        }
+        text {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 12px;
+            fill: black;
+        }
+        .label-text {
+            font-size: 11px;
+        }
+        .swimlane-text {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .group-label {
+            font-size: 11px;
+            font-style: italic;
+            fill: #666;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🚛 FTMS Architecture</h1>
-        <p>Interactive Multi-Level C4 Diagram</p>
+    <div class="container">
+        <div class="header">act Customer Management Process</div>
+        <svg viewBox="0 0 1400 1300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <polygon points="0 0, 10 3, 0 6" fill="black" />
+                </marker>
+            </defs>
+            
+            <!-- Swimlanes -->
+            <!-- Sales Manager Lane -->
+            <rect class="swimlane-header" x="50" y="50" width="150" height="40"/>
+            <text class="swimlane-text" x="125" y="75" text-anchor="middle">Sales Manager</text>
+            <rect class="swimlane" x="50" y="90" width="150" height="1150"/>
+            
+            <!-- System Lane -->
+            <rect class="swimlane-header" x="200" y="50" width="600" height="40"/>
+            <text class="swimlane-text" x="500" y="75" text-anchor="middle">System</text>
+            <rect class="swimlane" x="200" y="90" width="600" height="1150"/>
+            
+            <!-- Financial Officer Lane -->
+            <rect class="swimlane-header" x="800" y="50" width="200" height="40"/>
+            <text class="swimlane-text" x="900" y="75" text-anchor="middle">Financial Officer</text>
+            <rect class="swimlane" x="800" y="90" width="200" height="1150"/>
+            
+            <!-- Customer Lane -->
+            <rect class="swimlane-header" x="1000" y="50" width="150" height="40"/>
+            <text class="swimlane-text" x="1075" y="75" text-anchor="middle">Customer</text>
+            <rect class="swimlane" x="1000" y="90" width="150" height="1150"/>
+            
+            <!-- Start -->
+            <circle class="start-end" cx="125" cy="130" r="15"/>
+            
+            <!-- Activities - Sales Manager -->
+            <rect class="activity" x="65" y="180" width="120" height="50" rx="20"/>
+            <text x="125" y="210" text-anchor="middle">Add Customer</text>
+            
+            <!-- Group Boundary: Customer Account Setup -->
+            <rect class="group-boundary" x="210" y="250" width="580" height="420" rx="5"/>
+            <text class="group-label" x="220" y="270">Interruptible Activity Region</text>
+            
+            <!-- Activities - System -->
+            <rect class="activity" x="340" y="300" width="140" height="50" rx="20"/>
+            <text x="410" y="320" text-anchor="middle">Validate Tax ID</text>
+            <text x="410" y="335" text-anchor="middle">Number</text>
+            
+            <!-- Decision - Valid? -->
+            <polygon class="decision" points="410,390 460,425 410,460 360,425"/>
+            <text x="410" y="430" text-anchor="middle" font-size="11">Valid?</text>
+            
+            <rect class="activity" x="340" y="510" width="140" height="50" rx="20"/>
+            <text x="410" y="530" text-anchor="middle">Create Customer</text>
+            <text x="410" y="545" text-anchor="middle">Account</text>
+            
+            <rect class="activity" x="340" y="600" width="140" height="50" rx="20"/>
+            <text x="410" y="620" text-anchor="middle">Set Customer</text>
+            <text x="410" y="635" text-anchor="middle">Status: Active</text>
+            
+            <!-- Exception End (Dog-ear) for Invalid Tax ID -->
+            <path class="exception-end" d="M 580 400 L 680 400 L 680 450 L 665 450 L 665 465 L 650 465 L 650 450 L 580 450 Z"/>
+            <line stroke="black" stroke-width="2" x1="665" y1="450" x2="680" y2="465"/>
+            <text x="630" y="420" text-anchor="middle" font-size="11">Request</text>
+            <text x="630" y="435" text-anchor="middle" font-size="11">correction</text>
+            
+            <!-- Continue after group -->
+            <rect class="activity" x="65" y="720" width="120" height="50" rx="20"/>
+            <text x="125" y="740" text-anchor="middle">Create Contract</text>
+            <text x="125" y="755" text-anchor="middle">Agreement</text>
+            
+            <rect class="activity" x="340" y="820" width="140" height="50" rx="20"/>
+            <text x="410" y="840" text-anchor="middle">Apply Contract</text>
+            <text x="410" y="855" text-anchor="middle">Pricing</text>
+            
+            <!-- Group Boundary: Contract Monitoring -->
+            <rect class="group-boundary" x="300" y="900" width="480" height="250" rx="5"/>
+            <text class="group-label" x="310" y="920">Interruptible Activity Region</text>
+            
+            <rect class="activity" x="340" y="950" width="140" height="50" rx="20"/>
+            <text x="410" y="970" text-anchor="middle">Monitor Contract</text>
+            <text x="410" y="985" text-anchor="middle">Expiry</text>
+            
+            <!-- Decision - Expiring? -->
+            <polygon class="decision" points="410,1040 460,1075 410,1110 360,1075"/>
+            <text x="410" y="1080" text-anchor="middle" font-size="11">Expiring?</text>
+            
+            <rect class="activity" x="590" y="1050" width="140" height="50" rx="20"/>
+            <text x="660" y="1070" text-anchor="middle">Notify Sales</text>
+            <text x="660" y="1085" text-anchor="middle">Manager</text>
+            
+            <!-- Exception End (Dog-ear) for Contract Cancelled -->
+            <path class="exception-end" d="M 230 1050 L 310 1050 L 310 1100 L 295 1100 L 295 1115 L 280 1115 L 280 1100 L 230 1100 Z"/>
+            <line stroke="black" stroke-width="2" x1="295" y1="1100" x2="310" y2="1115"/>
+            <text x="270" y="1070" text-anchor="middle" font-size="10">Contract</text>
+            <text x="270" y="1085" text-anchor="middle" font-size="10">cancelled</text>
+            
+            <!-- Group Boundary: Invoice Processing -->
+            <rect class="group-boundary" x="810" y="150" width="330" height="350" rx="5"/>
+            <text class="group-label" x="820" y="170">Interruptible Activity Region</text>
+            
+            <!-- Activities - Financial Officer -->
+            <rect class="activity" x="830" y="200" width="140" height="50" rx="20"/>
+            <text x="900" y="220" text-anchor="middle">Generate</text>
+            <text x="900" y="235" text-anchor="middle">Invoice</text>
+            
+            <!-- Fork Bar -->
+            <rect class="start-end" x="855" y="280" width="90" height="8"/>
+            
+            <rect class="activity" x="1015" y="320" width="120" height="50" rx="20"/>
+            <text x="1075" y="345" text-anchor="middle">Receive Invoice</text>
+            
+            <rect class="activity" x="830" y="380" width="140" height="50" rx="20"/>
+            <text x="900" y="400" text-anchor="middle">Track Payment</text>
+            <text x="900" y="415" text-anchor="middle">Status</text>
+            
+            <!-- Join Bar -->
+            <rect class="start-end" x="855" y="460" width="90" height="8"/>
+            
+            <!-- Exception End (Dog-ear) for Invoice Dispute -->
+            <path class="exception-end" d="M 1040 220 L 1120 220 L 1120 270 L 1105 270 L 1105 285 L 1090 285 L 1090 270 L 1040 270 Z"/>
+            <line stroke="black" stroke-width="2" x1="1105" y1="270" x2="1120" y2="285"/>
+            <text x="1080" y="240" text-anchor="middle" font-size="10">Invoice</text>
+            <text x="1080" y="255" text-anchor="middle" font-size="10">disputed</text>
+            
+            <!-- Continue after invoice group -->
+            <!-- Decision - Paid? -->
+            <polygon class="decision" points="900,530 950,565 900,600 850,565"/>
+            <text x="900" y="570" text-anchor="middle" font-size="11">Paid?</text>
+            
+            <rect class="activity" x="1015" y="540" width="120" height="50" rx="20"/>
+            <text x="1075" y="565" text-anchor="middle">Make Payment</text>
+            
+            <rect class="activity" x="830" y="650" width="140" height="50" rx="20"/>
+            <text x="900" y="670" text-anchor="middle">Record</text>
+            <text x="900" y="685" text-anchor="middle">Payment</text>
+            
+            <rect class="activity" x="830" y="750" width="140" height="50" rx="20"/>
+            <text x="900" y="770" text-anchor="middle">Send Payment</text>
+            <text x="900" y="785" text-anchor="middle">Reminder</text>
+            
+            <!-- Decision - Overdue? -->
+            <polygon class="decision" points="900,840 950,875 900,910 850,875"/>
+            <text x="900" y="880" text-anchor="middle" font-size="11">Overdue?</text>
+            
+            <rect class="activity" x="830" y="960" width="140" height="50" rx="20"/>
+            <text x="900" y="980" text-anchor="middle">Flag Overdue</text>
+            <text x="900" y="995" text-anchor="middle">Customer</text>
+            
+            <!-- Normal End -->
+            <circle class="start-end" cx="900" cy="1180" r="15"/>
+            <circle class="start-end" cx="900" cy="1180" r="10" fill="white"/>
+            
+            <!-- Flows -->
+            <!-- Start to Add Customer -->
+            <line class="flow" x1="125" y1="145" x2="125" y2="180"/>
+            
+            <!-- Add Customer to Group -->
+            <line class="flow" x1="125" y1="230" x2="125" y2="280"/>
+            <line class="flow" x1="125" y1="280" x2="340" y2="280"/>
+            <line class="flow" x1="340" y1="280" x2="340" y2="300"/>
+            <text class="label-text" x="200" y="275">customer data</text>
+            
+            <!-- Validate to Decision -->
+            <line class="flow" x1="410" y1="350" x2="410" y2="390"/>
+            
+            <!-- Decision No to Exception -->
+            <line class="flow" x1="460" y1="425" x2="580" y2="425"/>
+            <text class="label-text" x="500" y="420">[No]</text>
+            
+            <!-- Decision Yes -->
+            <line class="flow" x1="410" y1="460" x2="410" y2="510"/>
+            <text class="label-text" x="420" y="490">[Yes]</text>
+            
+            <!-- Create Account to Set Status -->
+            <line class="flow" x1="410" y1="560" x2="410" y2="600"/>
+            
+            <!-- Set Status exit group to Create Contract -->
+            <line class="flow" x1="410" y1="650" x2="410" y2="690"/>
+            <line class="flow" x1="410" y1="690" x2="125" y2="690"/>
+            <line class="flow" x1="125" y1="690" x2="125" y2="720"/>
+            
+            <!-- Create Contract to Apply Pricing -->
+            <line class="flow" x1="125" y1="770" x2="125" y2="845"/>
+            <line class="flow" x1="125" y1="845" x2="340" y2="845"/>
+            
+            <!-- Apply Pricing to Monitor group -->
+            <line class="flow" x1="410" y1="870" x2="410" y2="950"/>
+            
+            <!-- Monitor to Decision -->
+            <line class="flow" x1="410" y1="1000" x2="410" y2="1040"/>
+            
+            <!-- Decision No exit group -->
+            <line class="flow" x1="410" y1="1110" x2="410" y2="1180"/>
+            <line class="flow" x1="410" y1="1180" x2="885" y2="1180"/>
+            <text class="label-text" x="420" y="1130">[No]</text>
+            
+            <!-- Decision Yes to Notify -->
+            <line class="flow" x1="460" y1="1075" x2="590" y2="1075"/>
+            <text class="label-text" x="510" y="1070">[Yes]</text>
+            
+            <!-- Notify exit to End -->
+            <line class="flow" x1="730" y1="1075" x2="800" y2="1075"/>
+            <line class="flow" x1="800" y1="1075" x2="800" y2="1180"/>
+            <line class="flow" x1="800" y1="1180" x2="885" y2="1180"/>
+            
+            <!-- Generate Invoice to Fork -->
+            <line class="flow" x1="900" y1="250" x2="900" y2="280"/>
+            
+            <!-- Fork to Receive and Track -->
+            <line class="flow" x1="945" y1="284" x2="1075" y2="284"/>
+            <line class="flow" x1="1075" y1="284" x2="1075" y2="320"/>
+            <line class="flow" x1="900" y1="288" x2="900" y2="380"/>
+            
+            <!-- Receive to Join -->
+            <line class="flow" x1="1075" y1="370" x2="1075" y2="464"/>
+            <line class="flow" x1="1075" y1="464" x2="945" y2="464"/>
+            
+            <!-- Track to Join -->
+            <line class="flow" x1="900" y1="430" x2="900" y2="460"/>
+            
+            <!-- Join exit group to Decision -->
+            <line class="flow" x1="900" y1="468" x2="900" y2="530"/>
+            
+            <!-- Decision No to Make Payment -->
+            <line class="flow" x1="950" y1="565" x2="1015" y2="565"/>
+            <text class="label-text" x="960" y="560">[No]</text>
+            
+            <!-- Make Payment to Record -->
+            <line class="flow" x1="1075" y1="590" x2="1075" y2="675"/>
+            <line class="flow" x1="1075" y1="675" x2="970" y2="675"/>
+            
+            <!-- Decision Yes to Record -->
+            <line class="flow" x1="900" y1="600" x2="900" y2="650"/>
+            <text class="label-text" x="910" y="630">[Yes]</text>
+            
+            <!-- Record to Send Reminder -->
+            <line class="flow" x1="900" y1="700" x2="900" y2="750"/>
+            
+            <!-- Send Reminder to Overdue Decision -->
+            <line class="flow" x1="900" y1="800" x2="900" y2="840"/>
+            
+            <!-- Overdue No loop back to Track -->
+            <line class="flow" x1="850" y1="875" x2="750" y2="875"/>
+            <line class="flow" x1="750" y1="875" x2="750" y2="405"/>
+            <line class="flow" x1="750" y1="405" x2="830" y2="405"/>
+            <text class="label-text" x="760" y="870">[No]</text>
+            
+            <!-- Overdue Yes to Flag -->
+            <line class="flow" x1="900" y1="910" x2="900" y2="960"/>
+            <text class="label-text" x="910" y="940">[Yes]</text>
+            
+            <!-- Flag to End -->
+            <line class="flow" x1="900" y1="1010" x2="900" y2="1165"/>
+            
+        </svg>
     </div>
-
-    <div id="canvas">
-        <svg id="lines-svg"></svg>
-        
-        <div class="nav-controls">
-            <button class="back-button" id="back-button">← Back</button>
-            <div class="breadcrumb" id="breadcrumb">
-                <span>Level 1:</span> System Context
-            </div>
-        </div>
-
-        <!-- Level 1: Actors + FTMS System Block -->
-        <div class="box actor" id="fleet-manager" data-level="1">
-            <span class="box-emoji">👨‍💼</span>
-            <div class="box-header">Fleet Manager</div>
-            <div class="box-description">Manages fleet operations</div>
-        </div>
-
-        <div class="box actor" id="accounting" data-level="1">
-            <span class="box-emoji">💰</span>
-            <div class="box-header">Accounting</div>
-            <div class="box-description">Financial records</div>
-        </div>
-
-        <div class="box actor" id="client" data-level="1">
-            <span class="box-emoji">👥</span>
-            <div class="box-header">Client</div>
-            <div class="box-description">End customers</div>
-        </div>
-
-        <div class="box ftms-main clickable" id="ftms-system" data-level="1">
-            <span class="box-emoji">🚚</span>
-            <div class="box-header">FTMS System</div>
-            <div class="box-description">Click to explore</div>
-        </div>
-
-        <!-- Level 2: FTMS Components -->
-        <div class="box component" id="web-client" data-level="2">
-            <span class="box-emoji">💻</span>
-            <div class="box-header">Web Client</div>
-            <div class="box-description">User interface</div>
-        </div>
-
-        <div class="box component" id="backend" data-level="2">
-            <span class="box-emoji">⚙️</span>
-            <div class="box-header">Backend API</div>
-            <div class="box-description">Business logic</div>
-        </div>
-
-        <!-- Level 2: Backend Infrastructure -->
-        <div class="box infrastructure" id="postgresql" data-level="2">
-            <span class="box-emoji">🐘</span>
-            <div class="box-header">PostgreSQL</div>
-            <div class="box-description">Database</div>
-        </div>
-
-        <div class="box infrastructure" id="s3-storage" data-level="2">
-            <span class="box-emoji">📦</span>
-            <div class="box-header">S3 Storage</div>
-            <div class="box-description">Object storage</div>
-        </div>
-
-        <div class="box infrastructure" id="message-queue" data-level="2">
-            <span class="box-emoji">📨</span>
-            <div class="box-header">Message Queue</div>
-            <div class="box-description">Async processing</div>
-        </div>
-
-        <div class="instructions">
-            <strong>💡 How to navigate</strong>
-            Click boxes with 👆 to dive deeper • Use ← Back to return
-        </div>
-    </div>
-
-    <script>
-        let currentLevel = 1;
-
-        // Layout configurations for each level
-        const layouts = {
-            1: {
-                'fleet-manager': { x: 0.15, y: 0.25 },
-                'accounting': { x: 0.15, y: 0.5 },
-                'client': { x: 0.15, y: 0.75 },
-                'ftms-system': { x: 0.65, y: 0.5 }
-            },
-            2: {
-                'web-client': { x: 0.2, y: 0.5 },
-                'backend': { x: 0.5, y: 0.5 },
-                'postgresql': { x: 0.725, y: 0.3 },
-                's3-storage': { x: 0.725, y: 0.5 },
-                'message-queue': { x: 0.725, y: 0.7 }
-            }
-        };
-
-        // Connection definitions per level
-        const connections = {
-            1: [
-                { from: 'fleet-manager', to: 'ftms-system', color: '#667eea' },
-                { from: 'accounting', to: 'ftms-system', color: '#764ba2' },
-                { from: 'client', to: 'ftms-system', color: '#667eea' }
-            ],
-            2: [
-                { from: 'web-client', to: 'backend', color: '#f5576c' },
-                { from: 'backend', to: 'postgresql', color: '#4facfe' },
-                { from: 'backend', to: 's3-storage', color: '#00f2fe' },
-                { from: 'backend', to: 'message-queue', color: '#43e97b' }
-            ]
-        };
-
-        // Initialize
-        function init() {
-            const clickableBoxes = document.querySelectorAll('.clickable');
-            clickableBoxes.forEach(box => {
-                box.addEventListener('click', handleClick);
-            });
-            
-            document.getElementById('back-button').addEventListener('click', stepOut);
-            window.addEventListener('resize', () => {
-                positionBoxes();
-                drawLines();
-            });
-
-            showLevel(1);
-        }
-
-        // Position boxes based on layout configuration
-        function positionBoxes() {
-            const canvas = document.getElementById('canvas');
-            const canvasRect = canvas.getBoundingClientRect();
-            const layout = layouts[currentLevel];
-
-            Object.keys(layout).forEach(boxId => {
-                const box = document.getElementById(boxId);
-                if (!box) return;
-
-                const pos = layout[boxId];
-                const boxWidth = box.offsetWidth;
-                const boxHeight = box.offsetHeight;
-
-                // Calculate position (centered)
-                const left = (canvasRect.width * pos.x) - (boxWidth / 2);
-                const top = (canvasRect.height * pos.y) - (boxHeight / 2);
-
-                box.style.left = left + 'px';
-                box.style.top = top + 'px';
-            });
-        }
-
-        // Click handler for step-in navigation
-        function handleClick(e) {
-            const box = e.currentTarget;
-            
-            if (box.id === 'ftms-system' && currentLevel === 1) {
-                stepInto(2);
-            }
-        }
-
-        // Step into a deeper level
-        function stepInto(targetLevel) {
-            currentLevel = targetLevel;
-            showLevel(targetLevel);
-        }
-
-        // Step out to previous level
-        function stepOut() {
-            if (currentLevel === 1) return;
-            currentLevel--;
-            showLevel(currentLevel);
-        }
-
-        // Show boxes for specific level
-        function showLevel(level) {
-            const allBoxes = document.querySelectorAll('.box');
-            const backButton = document.getElementById('back-button');
-            const breadcrumb = document.getElementById('breadcrumb');
-            
-            // Update UI elements
-            if (level === 1) {
-                backButton.classList.remove('visible');
-                breadcrumb.innerHTML = '<span>Level 1:</span> System Context';
-            } else if (level === 2) {
-                backButton.classList.add('visible');
-                breadcrumb.innerHTML = '<span>Level 2:</span> Container Diagram';
-            }
-            
-            // Show appropriate boxes
-            allBoxes.forEach(box => {
-                const boxLevel = parseInt(box.getAttribute('data-level'));
-                box.classList.remove('visible', 'context', 'fade-in');
-                
-                if (boxLevel === level) {
-                    box.classList.add('visible', 'fade-in');
-                } else if (layouts[level] && layouts[level][box.id]) {
-                    // Show as context if it appears in current level layout
-                    box.classList.add('visible', 'context');
-                }
-            });
-            
-            // Position and draw after a brief delay
-            setTimeout(() => {
-                positionBoxes();
-                drawLines();
-            }, 50);
-        }
-
-        // Draw connection lines
-        function drawLines() {
-            const svg = document.getElementById('lines-svg');
-            svg.innerHTML = '';
-
-            const levelConnections = connections[currentLevel] || [];
-
-            levelConnections.forEach(conn => {
-                const fromElem = document.getElementById(conn.from);
-                const toElem = document.getElementById(conn.to);
-
-                if (!fromElem || !toElem) return;
-                if (!fromElem.classList.contains('visible') || !toElem.classList.contains('visible')) return;
-
-                const fromRect = fromElem.getBoundingClientRect();
-                const toRect = toElem.getBoundingClientRect();
-                const canvas = document.getElementById('canvas').getBoundingClientRect();
-
-                // Calculate center points
-                const x1 = fromRect.left + fromRect.width / 2 - canvas.left;
-                const y1 = fromRect.top + fromRect.height / 2 - canvas.top;
-                const x2 = toRect.left + toRect.width / 2 - canvas.left;
-                const y2 = toRect.top + toRect.height / 2 - canvas.top;
-
-                // Calculate edge points
-                const angle = Math.atan2(y2 - y1, x2 - x1);
-                const fromEdgeX = x1 + (fromRect.width / 2) * Math.cos(angle);
-                const fromEdgeY = y1 + (fromRect.height / 2) * Math.sin(angle);
-                const toEdgeX = x2 - (toRect.width / 2) * Math.cos(angle);
-                const toEdgeY = y2 - (toRect.height / 2) * Math.sin(angle);
-
-                // Create straight line
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', fromEdgeX);
-                line.setAttribute('y1', fromEdgeY);
-                line.setAttribute('x2', toEdgeX);
-                line.setAttribute('y2', toEdgeY);
-                line.setAttribute('class', 'connection-line');
-                line.setAttribute('stroke', conn.color);
-                
-                svg.appendChild(line);
-
-                // Add arrowhead
-                const arrowSize = 10;
-                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                
-                const points = [
-                    [toEdgeX, toEdgeY],
-                    [toEdgeX - arrowSize * Math.cos(angle - Math.PI / 6), toEdgeY - arrowSize * Math.sin(angle - Math.PI / 6)],
-                    [toEdgeX - arrowSize * Math.cos(angle + Math.PI / 6), toEdgeY - arrowSize * Math.sin(angle + Math.PI / 6)]
-                ];
-                
-                arrow.setAttribute('points', points.map(p => p.join(',')).join(' '));
-                arrow.setAttribute('fill', conn.color);
-                arrow.setAttribute('class', 'arrow');
-                
-                svg.appendChild(arrow);
-            });
-        }
-
-        // Start
-        init();
-    </script>
 </body>
 </html>
