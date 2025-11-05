@@ -1,0 +1,21 @@
+### Creare Vehicul Nou
+POST http://localhost:8080/api/v1/fleet/vehicles
+Content-Type: application/json
+
+{
+  "registrationNumber": "B-101-ABC",
+  "make": "Volvo",
+  "model": "FH16",
+  "vehicleType": "BOX_TRUCK",
+  "yearOfManufacture": 2022,
+  "maxWeightKg": 25000,
+  "maxVolumeCubicMeters": 85,
+  "fuelType": "Diesel",
+  "currentMileage": 50000,
+  "insurancePolicyNumber": "INS-987654",
+  "insuranceExpiryDate": "2026-10-01",
+  "registrationExpiryDate": "2026-05-01"
+}
+
+
+###
