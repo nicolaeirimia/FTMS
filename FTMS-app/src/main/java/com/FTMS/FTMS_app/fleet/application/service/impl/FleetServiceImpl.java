@@ -49,7 +49,7 @@ public class FleetServiceImpl implements FleetService {
                 .insuranceExpiryDate(request.getInsuranceExpiryDate())
                 .registrationExpiryDate(request.getRegistrationExpiryDate())
                 .status(VehicleStatus.AVAILABLE)
-                .build(); // Lista maintenanceHistory e inițializată automat de @Builder.Default
+                .build();
 
         return vehicleRepository.save(vehicle);
     }
@@ -98,7 +98,7 @@ public class FleetServiceImpl implements FleetService {
     @Transactional
     public void scheduleMaintenance(Long vehicleId) {
         Vehicle vehicle = getVehicleById(vehicleId);
-        vehicle.scheduleMaintenance(); // Business Logic
+        vehicle.scheduleMaintenance();
         vehicleRepository.save(vehicle);
     }
 
@@ -149,7 +149,7 @@ public class FleetServiceImpl implements FleetService {
     @Transactional(readOnly = true)
     public Driver getDriverById(Long id) {
         return driverRepository.findById(id)
-                // AICI AM CORECTAT: Folosim excepția custom
+
                 .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + id));
     }
 

@@ -14,7 +14,7 @@ public class MaintenanceRecordDto {
 
     @NotNull
     @PastOrPresent(message = "Maintenance date cannot be in the future")
-
+    private LocalDate date;
     @NotNull
     private MaintenanceType maintenanceType;
 
