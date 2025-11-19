@@ -14,10 +14,7 @@ public interface CustomerService {
     // --- Management Clienți ---
     Customer createCustomer(CreateCustomerRequest request);
 
-    /**
-     * Permite actualizarea datelor (ex: adresa, telefon).
-     * Presupunem că folosim același DTO sau unul specific Update.
-     */
+
     Customer updateCustomer(Long id, CreateCustomerRequest request);
 
     Customer getCustomerById(Long id);

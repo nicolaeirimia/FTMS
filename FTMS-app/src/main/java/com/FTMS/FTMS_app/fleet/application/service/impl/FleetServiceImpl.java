@@ -1,28 +1,25 @@
-package com.FTMS.FTMS_app.fleet;
+package com.FTMS.FTMS_app.fleet.application.service.impl;
 
+import com.FTMS.FTMS_app.common.exception.ResourceNotFoundException;
 import com.FTMS.FTMS_app.fleet.application.dto.CreateDriverRequest;
 import com.FTMS.FTMS_app.fleet.application.dto.CreateVehicleRequest;
 import com.FTMS.FTMS_app.fleet.application.dto.MaintenanceRecordDto;
 import com.FTMS.FTMS_app.fleet.application.service.FleetService;
 import com.FTMS.FTMS_app.fleet.domain.model.*;
-import com.FTMS.FTMS_app.common.exception.ResourceNotFoundException;
 import com.FTMS.FTMS_app.fleet.domain.repository.DriverRepository;
 import com.FTMS.FTMS_app.fleet.domain.repository.VehicleRepository;
-// Importă excepția pe care o vom crea la pasul următor
-// import com.FTMS.FTMS_app.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@Transactional // Toate metodele publice vor rula într-o tranzacție
+@Transactional
 public class FleetServiceImpl implements FleetService {
 
     private final VehicleRepository vehicleRepository;
     private final DriverRepository driverRepository;
 
-    // Constructor Injection (recomandat de Spring)
     public FleetServiceImpl(VehicleRepository vehicleRepository, DriverRepository driverRepository) {
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
@@ -30,34 +27,31 @@ public class FleetServiceImpl implements FleetService {
 
     @Override
     public Vehicle addVehicle(CreateVehicleRequest request) {
-        // 1. Validare (Domain Validation Service - menționat în slide-uri)
-        // Verifică unicitatea nr. de înmatriculare
+        // 1. Validare Unicitate
         vehicleRepository.findByRegistrationNumber(request.getRegistrationNumber())
                 .ifPresent(v -> {
                     throw new IllegalArgumentException("Vehicle with registration number " + request.getRegistrationNumber() + " already exists.");
                 });
 
-        // 2. Mapare DTO -> Model
+        // 2. Mapare (Folosind Builder pentru claritate)
+        // Dacă nu ai pus @Builder pe VehicleCapacity, folosește constructorul: new VehicleCapacity(...)
         VehicleCapacity capacity = new VehicleCapacity(request.getMaxWeightKg(), request.getMaxVolumeCubicMeters());
 
-        Vehicle vehicle = new Vehicle(
-                null, // ID-ul va fi generat de JPA
-                request.getRegistrationNumber(),
-                request.getMake(),
-                request.getModel(),
-                request.getVehicleType(),
-                request.getYearOfManufacture(),
-                capacity,
-                request.getFuelType(),
-                request.getCurrentMileage(),
-                request.getInsurancePolicyNumber(),
-                request.getInsuranceExpiryDate(),
-                request.getRegistrationExpiryDate(),
-                VehicleStatus.AVAILABLE, // Status inițial
-                List.of() // Fără istoric de mentenanță
-        );
+        Vehicle vehicle = Vehicle.builder()
+                .registrationNumber(request.getRegistrationNumber())
+                .make(request.getMake())
+                .model(request.getModel())
+                .vehicleType(request.getVehicleType())
+                .yearOfManufacture(request.getYearOfManufacture())
+                .capacity(capacity)
+                .fuelType(request.getFuelType())
+                .currentMileage(request.getCurrentMileage())
+                .insurancePolicyNumber(request.getInsurancePolicyNumber())
+                .insuranceExpiryDate(request.getInsuranceExpiryDate())
+                .registrationExpiryDate(request.getRegistrationExpiryDate())
+                .status(VehicleStatus.AVAILABLE)
+                .build(); // Lista maintenanceHistory e inițializată automat de @Builder.Default
 
-        // 3. Salvare (Repository)
         return vehicleRepository.save(vehicle);
     }
 
@@ -69,72 +63,63 @@ public class FleetServiceImpl implements FleetService {
                     throw new IllegalArgumentException("Driver with license number " + request.getLicenseNumber() + " already exists.");
                 });
 
-        // 2. Mapare DTO -> Model (Value Objects)
-        LicenseInfo license = new LicenseInfo(
-                request.getLicenseNumber(),
-                request.getLicenseType(),
-                request.getLicenseIssueDate(),
-                request.getLicenseExpiryDate()
-        );
+        // 2. Mapare Value Objects (Folosind Builder sau Constructor)
+        // Presupunem că ai pus @Builder pe ele. Dacă nu, folosește new LicenseInfo(...)
+        LicenseInfo license = LicenseInfo.builder()
+                .licenseNumber(request.getLicenseNumber())
+                .licenseType(request.getLicenseType())
+                .issueDate(request.getLicenseIssueDate())
+                .expiryDate(request.getLicenseExpiryDate())
+                .build();
 
-        ContactInfo contact = new ContactInfo(
-                request.getPhone(),
-                request.getEmail(),
-                request.getAddress()
-        );
+        ContactInfo contact = ContactInfo.builder()
+                .phone(request.getPhone())
+                .email(request.getEmail())
+                .address(request.getAddress())
+                .build();
 
-        ContactInfo emergencyContact = new ContactInfo(
-                request.getEmergencyContactName(),
-                request.getEmergencyContactPhone(),
-                null, // Fără adresă pentru contactul de urgență
-                null
-        );
+        ContactInfo emergencyContact = ContactInfo.builder()
+                .name(request.getEmergencyContactName())
+                .phone(request.getEmergencyContactPhone())
+                .build();
 
-        Driver driver = new Driver(
-                null, // ID generat
-                request.getName(),
-                license,
-                contact,
-                emergencyContact,
-                request.getEmploymentDate(),
-                DriverStatus.AVAILABLE, // Status inițial
-                null // Fără vehicul principal la început
-        );
+        // 3. Mapare Driver
+        Driver driver = Driver.builder()
+                .name(request.getName())
+                .licenseInfo(license)
+                .contactDetails(contact)
+                .emergencyContact(emergencyContact)
+                .employmentDate(request.getEmploymentDate())
+                .status(DriverStatus.AVAILABLE)
+                .build();
 
-        // 3. Salvare
         return driverRepository.save(driver);
     }
 
     @Override
-    @Transactional // Asigură-te că modificarea este salvată
+    @Transactional
     public void scheduleMaintenance(Long vehicleId) {
-        // 1. Găsește entitatea
         Vehicle vehicle = getVehicleById(vehicleId);
-        // 2. Apelează logica de business din domeniu
-        vehicle.scheduleMaintenance();
-        // 3. Salvează (JPA o face automat la finalul tranzacției, dar putem fi expliciți)
+        vehicle.scheduleMaintenance(); // Business Logic
         vehicleRepository.save(vehicle);
     }
 
     @Override
     @Transactional
     public void completeMaintenance(Long vehicleId, MaintenanceRecordDto recordDto) {
-        // 1. Găsește entitatea
         Vehicle vehicle = getVehicleById(vehicleId);
 
-        // 2. Mapare DTO -> Model
-        MaintenanceRecord record = new MaintenanceRecord(
-                recordDto.getDate(),
-                recordDto.getMaintenanceType(),
-                recordDto.getDescription(),
-                recordDto.getCost(),
-                recordDto.getServiceProvider()
-        );
+        // Mapare folosind Builder
+        MaintenanceRecord record = MaintenanceRecord.builder()
+                .date(recordDto.getDate())
+                .maintenanceType(recordDto.getMaintenanceType())
+                .description(recordDto.getDescription())
+                .cost(recordDto.getCost())
+                .serviceProvider(recordDto.getServiceProvider())
+                .build();
 
-        // 3. Apelează logica de business
-        vehicle.completeMaintenance(record);
+        vehicle.completeMaintenance(record); // Business Logic (leagă și relația)
 
-        // 4. Salvează
         vehicleRepository.save(vehicle);
     }
 
@@ -144,7 +129,6 @@ public class FleetServiceImpl implements FleetService {
         Driver driver = getDriverById(driverId);
         Vehicle vehicle = getVehicleById(vehicleId);
 
-        // Aici putem adăuga validări suplimentare, ex:
         if (!driver.canDriveVehicle(vehicle)) {
             throw new IllegalArgumentException("Driver " + driver.getName() + " does not have the correct license (" +
                     driver.getLicenseInfo().getLicenseType() + ") for vehicle type " + vehicle.getVehicleType());
@@ -167,8 +151,8 @@ public class FleetServiceImpl implements FleetService {
     @Transactional(readOnly = true)
     public Driver getDriverById(Long id) {
         return driverRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Driver not found with id: " + id));
-        // .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + id));
+                // AICI AM CORECTAT: Folosim excepția custom
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + id));
     }
 
     @Override
@@ -183,13 +167,12 @@ public class FleetServiceImpl implements FleetService {
         return vehicleRepository.findByStatus(VehicleStatus.AVAILABLE);
     }
 
-    // ... (metodele existente în FleetServiceImpl)
+    // --- Metode de Workflow (apelate de ShipmentService) ---
 
     @Override
     @Transactional
     public void assignDriver(Long driverId) {
         Driver driver = getDriverById(driverId);
-        // Apelează logica de business din domeniu
         driver.assignToShipment();
         driverRepository.save(driver);
     }
@@ -198,7 +181,6 @@ public class FleetServiceImpl implements FleetService {
     @Transactional
     public void assignVehicle(Long vehicleId) {
         Vehicle vehicle = getVehicleById(vehicleId);
-        // Apelează logica de business din domeniu
         vehicle.assignToShipment();
         vehicleRepository.save(vehicle);
     }
@@ -207,7 +189,7 @@ public class FleetServiceImpl implements FleetService {
     @Transactional
     public void releaseDriver(Long driverId) {
         Driver driver = getDriverById(driverId);
-        driver.completeShipment(); // Metoda de business din domeniu
+        driver.completeShipment();
         driverRepository.save(driver);
     }
 
@@ -215,7 +197,7 @@ public class FleetServiceImpl implements FleetService {
     @Transactional
     public void releaseVehicle(Long vehicleId) {
         Vehicle vehicle = getVehicleById(vehicleId);
-        vehicle.releaseFromShipment(); // Metoda de business din domeniu
+        vehicle.releaseFromShipment();
         vehicleRepository.save(vehicle);
     }
 }
