@@ -26,53 +26,55 @@ Aplicația este împărțită în trei module funcționale distincte (pachete r�
 
 fleet (Fleet & Resource Management):
 
-Gestionează resursele interne (Șoferi, Vehicule).
+    Gestionează resursele interne (Șoferi, Vehicule).
 
-Responsabil de mentenanță și disponibilitate.
+    Responsabil de mentenanță și disponibilitate.
 
 customer (Customer Management):
 
-Gestionează profilurile clienților, contractele și aspectele financiare (Facturi).
+    Gestionează profilurile clienților, contractele și aspectele financiare (Facturi).
 
 shipment (Shipment Management):
 
-Core Domain. Modulul orchestrator care leagă cererea (Clientul) de ofertă (Flota).
+    Core Domain. Modulul orchestrator care leagă cererea (Clientul) de ofertă (Flota).
 
 Fiecare modul are straturile interne:
 
-domain: Entități, Value Objects, Repository Interfaces.
+    domain: Entități, Value Objects, Repository Interfaces.
 
-application: Servicii (Workflow), DTOs.
+    application: Servicii (Workflow), DTOs.
 
-presentation: REST Controllers.
+    presentation: REST Controllers.
 
-infrastructure: Implementări specifice (ex: SQL queries complexe).
+    infrastructure: Implementări specifice (ex: SQL queries complexe).
 
 3. 🧩 Modelul de Domeniu (Domain Model)
 Implementarea persistenței utilizează facilități avansate JPA pentru a respecta regulile de business și integritatea datelor.
 
 3.1. Entități Principale (Aggregates)
-Vehicle: Rădăcina agregatului pentru flotă. Gestionează lista de MaintenanceRecord folosind CascadeType.ALL și orphanRemoval=true.
+  
+  Vehicle: Rădăcina agregatului pentru flotă. Gestionează lista de MaintenanceRecord folosind CascadeType.ALL și orphanRemoval=true.
 
-Customer: Gestionează lista de adrese de livrare folosind @ElementCollection (tabel secundar gestionat automat) și relația cu Contract.
+  Customer: Gestionează lista de adrese de livrare folosind @ElementCollection (tabel secundar gestionat automat) și relația cu Contract.
 
-Shipment: Entitatea centrală. Pentru a menține Decuplarea (Loose Coupling), aceasta nu are relații directe @OneToOne cu Driver sau Vehicle, ci stochează doar Referințe prin ID (assignedDriverId).
+  Shipment: Entitatea centrală. Pentru a menține Decuplarea (Loose Coupling), aceasta nu are relații directe @OneToOne cu Driver sau Vehicle, ci stochează doar Referințe prin ID (assignedDriverId).
 
 3.2. Obiecte Valoare (Value Objects)
 Sunt folosite pentru a încapsula date care nu au identitate proprie, folosind @Embeddable:
 
-VehicleCapacity: Încapsulează logica de validare (ex: isSufficient(weight, volume)).
+  VehicleCapacity: Încapsulează logica de validare (ex: isSufficient(weight, volume)).
 
-ContactInfo & Address: Reutilizate în mai multe entități.
+  ContactInfo & Address: Reutilizate în mai multe entități.
 
-Soluționarea Coliziunilor: S-a folosit @AttributeOverrides pentru a permite utilizarea aceluiași VO de mai multe ori în aceeași entitate (ex: pickupLocation și deliveryLocation în Shipment).
+  Soluționarea Coliziunilor: S-a folosit @AttributeOverrides pentru a permite utilizarea aceluiași VO de mai multe ori în aceeași entitate (ex: pickupLocation și deliveryLocation în Shipment).
 
 3.3. Rich Enums (Polimorfism simplificat)
-Logica de business nu este împrăștiată în if/else, ci încapsulată în Enums:
 
-CustomerCategory: Conține logica de calcul a discount-ului (applyDiscount()).
+  Logica de business nu este împrăștiată în if/else, ci încapsulată în Enums:
 
-PaymentTerms: Conține logica de calcul a scadenței (calculateDueDate()).
+  CustomerCategory: Conține logica de calcul a discount-ului (applyDiscount()).
+
+  PaymentTerms: Conține logica de calcul a scadenței (calculateDueDate()).
 
 4. ⚙️ Logica de Business & Workflow
 Sistemul implementează reguli complexe de validare și fluxuri tranzacționale.
@@ -80,23 +82,23 @@ Sistemul implementează reguli complexe de validare și fluxuri tranzacționale.
 4.1. Fluxul Principal (Shipment Workflow)
 Implementat în ShipmentServiceImpl:
 
-Creare: Se validează eligibilitatea clientului (ex: să nu fie SUSPENDED din cauza datoriilor).
+  Creare: Se validează eligibilitatea clientului (ex: să nu fie SUSPENDED din cauza datoriilor).
 
-Alocare (Assignment):
+  Alocare (Assignment):
 
-Se verifică disponibilitatea șoferului (driver.isAvailable()).
+  Se verifică disponibilitatea șoferului (driver.isAvailable()).
 
-Se verifică compatibilitatea permisului (driver.canDriveVehicle()).
+  Se verifică compatibilitatea permisului (driver.canDriveVehicle()).
 
-Se verifică capacitatea vehiculului (vehicle.getCapacity().isSufficient()).
+  Se verifică capacitatea vehiculului (vehicle.getCapacity().isSufficient()).
 
 Tranzacție Atomică: Dacă toate validările trec, statusurile se actualizează sincronizat (Shipment -> SCHEDULED, Driver -> ON_ROUTE, Vehicle -> IN_USE).
 
-Livrare & Facturare:
+  Livrare & Facturare:
 
-La confirmarea livrării, resursele sunt eliberate automat (AVAILABLE).
+  La confirmarea livrării, resursele sunt eliberate automat (AVAILABLE).
 
-Sistemul apelează CustomerService pentru a genera automat factura, aplicând reducerile contractuale.
+  Sistemul apelează CustomerService pentru a genera automat factura, aplicând reducerile contractuale.
 
 5. 🧪 Strategia de Testare
 Proiectul folosește o suită de teste automată robustă, împărțită pe 3 niveluri de complexitate:
@@ -104,20 +106,20 @@ Proiectul folosește o suită de teste automată robustă, împărțită pe 3 ni
 Nivelul 1: Infrastructură & Persistență (Test1_EntityRepository)
 Scop: Verifică integrarea cu PostgreSQL și mapările Hibernate.
 
-Ce testează: CRUD operations, constrângeri unice (DataIntegrityViolationException), query-uri custom JPQL (ex: findHeavyShipments).
+  Ce testează: CRUD operations, constrângeri unice (DataIntegrityViolationException), query-uri custom JPQL (ex: findHeavyShipments).
 
-Tehnologie: @DataJpaTest / @SpringBootTest cu tranzacții.
+  Tehnologie: @DataJpaTest / @SpringBootTest cu tranzacții.
 
 Nivelul 2: Domain & Computation (Test2_ComputingServices)
 Scop: Verifică logica matematică și regulile de business izolate.
 
-Ce testează: Calculul facturilor (plăți parțiale/totale), eligibilitatea vehiculelor, aplicarea discount-urilor.
+  Ce testează: Calculul facturilor (plăți parțiale/totale), eligibilitatea vehiculelor, aplicarea discount-urilor.
 
-Tehnologie: JUnit 5 (Unit Tests simple, foarte rapide).
+  Tehnologie: JUnit 5 (Unit Tests simple, foarte rapide).
 
 Nivelul 3: Workflow & Integration (Test3_WorkflowServices)
 Scop: Verifică orchestrarea completă între module.
 
-Ce testează: Scenariul "Happy Path" (Creare -> Alocare -> Confirmare) și scenarii de eroare ("Unhappy Path" - ex: alocarea unui șofer ocupat).
+  Ce testează: Scenariul "Happy Path" (Creare -> Alocare -> Confirmare) și scenarii de eroare ("Unhappy Path" - ex: alocarea unui șofer ocupat).
 
-Tehnologie: @SpringBootTest, @Transactional, @Commit (pentru verificarea vizuală a datelor în DB).
+  Tehnologie: @SpringBootTest, @Transactional, @Commit (pentru verificarea vizuală a datelor în DB).
