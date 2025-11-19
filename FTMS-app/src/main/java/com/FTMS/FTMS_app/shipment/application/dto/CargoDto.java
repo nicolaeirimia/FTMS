@@ -3,15 +3,23 @@ package com.FTMS.FTMS_app.shipment.application.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CargoDto {
-    @NotEmpty
+
+    @NotEmpty(message = "Cargo description is required")
     private String description;
-    @Min(1)
+
+    @Min(value = 1, message = "Weight must be at least 1 kg")
     private double weightKg;
-    @Min(1)
+
+    @Min(value = 1, message = "Volume must be at least 1 cubic meter")
     private double volumeCubicMeters;
-    private String specialHandlingRequirements;
-    private String additionalNotes;
+
+    private String specialHandlingRequirements; // Opțional
+    private String additionalNotes;             // Opțional
 }

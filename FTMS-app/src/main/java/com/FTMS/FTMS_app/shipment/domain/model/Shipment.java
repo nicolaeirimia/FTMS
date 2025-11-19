@@ -1,17 +1,18 @@
 package com.FTMS.FTMS_app.shipment.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*; // Builder, ToString, Setter
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "shipments")
 @Getter
+@Setter // <-- Util pentru teste și framework
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder // <-- Face codul din Service mult mai curat
+@ToString(exclude = "deliveryConfirmation") // <-- CRITIC: Previne bucla infinită
 public class Shipment {
 
     @Id
@@ -25,30 +26,34 @@ public class Shipment {
     @Column(nullable = false)
     private ShipmentStatus status;
 
-    // --- ID-uri de referință către alte agregate ---
+    // --- ID-uri de referință (Decuplare module) ---
     @Column(nullable = false)
-    private Long customerId; // Referință la Customer
+    private Long customerId;
 
-    private Long assignedDriverId; // Referință la Driver
-    private Long assignedVehicleId; // Referință la Vehicle
+    private Long assignedDriverId;
+    private Long assignedVehicleId;
 
-    // --- Value Objects încorporate ---
+    // --- Value Objects (Mapate corect cu Override) ---
     @Embedded
-    @AttributeOverride(name = "street", column = @Column(name = "pickup_street"))
-    @AttributeOverride(name = "city", column = @Column(name = "pickup_city"))
-    @AttributeOverride(name = "zipCode", column = @Column(name = "pickup_zip"))
-    @AttributeOverride(name = "country", column = @Column(name = "pickup_country"))
-    @AttributeOverride(name = "contactPerson", column = @Column(name = "pickup_contact_person"))
-    @AttributeOverride(name = "contactPhone", column = @Column(name = "pickup_contact_phone"))
+    @AttributeOverrides({
+            @AttributeOverride(name = "street", column = @Column(name = "pickup_street")),
+            @AttributeOverride(name = "city", column = @Column(name = "pickup_city")),
+            @AttributeOverride(name = "zipCode", column = @Column(name = "pickup_zip")),
+            @AttributeOverride(name = "country", column = @Column(name = "pickup_country")),
+            @AttributeOverride(name = "contactPerson", column = @Column(name = "pickup_contact_person")),
+            @AttributeOverride(name = "contactPhone", column = @Column(name = "pickup_contact_phone"))
+    })
     private ShipmentContactLocation pickupLocation;
 
     @Embedded
-    @AttributeOverride(name = "street", column = @Column(name = "delivery_street"))
-    @AttributeOverride(name = "city", column = @Column(name = "delivery_city"))
-    @AttributeOverride(name = "zipCode", column = @Column(name = "delivery_zip"))
-    @AttributeOverride(name = "country", column = @Column(name = "delivery_country"))
-    @AttributeOverride(name = "contactPerson", column = @Column(name = "delivery_contact_person"))
-    @AttributeOverride(name = "contactPhone", column = @Column(name = "delivery_contact_phone"))
+    @AttributeOverrides({
+            @AttributeOverride(name = "street", column = @Column(name = "delivery_street")),
+            @AttributeOverride(name = "city", column = @Column(name = "delivery_city")),
+            @AttributeOverride(name = "zipCode", column = @Column(name = "delivery_zip")),
+            @AttributeOverride(name = "country", column = @Column(name = "delivery_country")),
+            @AttributeOverride(name = "contactPerson", column = @Column(name = "delivery_contact_person")),
+            @AttributeOverride(name = "contactPhone", column = @Column(name = "delivery_contact_phone"))
+    })
     private ShipmentContactLocation deliveryLocation;
 
     @Embedded
@@ -58,34 +63,19 @@ public class Shipment {
     private LocalDateTime pickupDateTime;
     private LocalDateTime requestedDeliveryDateTime;
 
-    // --- Entitate componentă ---
+    // --- Entitate Copil (Relatie 1-to-1) ---
     @OneToOne(mappedBy = "shipment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private DeliveryConfirmation deliveryConfirmation;
 
-    // Constructor pentru creare
-    public Shipment(String referenceNumber, Long customerId, ShipmentContactLocation pickupLocation, ShipmentContactLocation deliveryLocation, CargoDetails cargoDetails, LocalDateTime pickupDateTime, LocalDateTime requestedDeliveryDateTime) {
-        this.referenceNumber = referenceNumber;
-        this.customerId = customerId;
-        this.pickupLocation = pickupLocation;
-        this.deliveryLocation = deliveryLocation;
-        this.cargoDetails = cargoDetails;
-        this.pickupDateTime = pickupDateTime;
-        this.requestedDeliveryDateTime = requestedDeliveryDateTime;
-        this.status = ShipmentStatus.PENDING; // Status inițial
-    }
+    // Constructorul manual poate fi șters dacă folosești @Builder,
+    // dar îl poți păstra dacă ai teste care depind de el.
 
-    // --- Logica de Business (Metode de domeniu) ---
+    // --- Logica de Business (Perfectă) ---
 
-    /**
-     * Verifică dacă transportul poate fi alocat.
-     */
     public boolean canBeAssigned() {
         return this.status == ShipmentStatus.PENDING || this.status == ShipmentStatus.SCHEDULED;
     }
 
-    /**
-     * Alocă un șofer și un vehicul.
-     */
     public void assign(Long driverId, Long vehicleId) {
         if (!canBeAssigned()) {
             throw new IllegalStateException("Shipment cannot be assigned in its current state: " + this.status);
@@ -95,9 +85,6 @@ public class Shipment {
         this.status = ShipmentStatus.SCHEDULED;
     }
 
-    /**
-     * Marchează transportul ca fiind ridicat.
-     */
     public void markAsPickedUp() {
         if (this.status != ShipmentStatus.SCHEDULED) {
             throw new IllegalStateException("Shipment must be SCHEDULED to be picked up.");
@@ -105,9 +92,6 @@ public class Shipment {
         this.status = ShipmentStatus.PICKED_UP;
     }
 
-    /**
-     * Marchează transportul ca fiind în tranzit.
-     */
     public void markAsInTransit() {
         if (this.status != ShipmentStatus.PICKED_UP) {
             throw new IllegalStateException("Shipment must be PICKED_UP to be in transit.");
@@ -115,25 +99,20 @@ public class Shipment {
         this.status = ShipmentStatus.IN_TRANSIT;
     }
 
-    /**
-     * Anulează transportul.
-     */
     public void cancel() {
         if (this.status == ShipmentStatus.DELIVERED) {
             throw new IllegalStateException("Cannot cancel a delivered shipment.");
         }
         this.status = ShipmentStatus.CANCELED;
-        // Eliberarea resurselor (driver/vehicle) va fi gestionată de Application Service
+        // Resursele se eliberează în Service, nu aici (corect)
     }
 
-    /**
-     * Finalizează livrarea și atașează confirmarea.
-     */
     public void completeDelivery(DeliveryConfirmation confirmation) {
         if (this.status != ShipmentStatus.IN_TRANSIT) {
             throw new IllegalStateException("Shipment must be IN_TRANSIT to be delivered.");
         }
         this.deliveryConfirmation = confirmation;
+
         // Asigură legătura bidirecțională
         if (confirmation.getShipment() == null) {
             confirmation.setShipment(this);

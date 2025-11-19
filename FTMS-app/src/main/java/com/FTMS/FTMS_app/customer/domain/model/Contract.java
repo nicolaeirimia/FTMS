@@ -1,10 +1,7 @@
 package com.FTMS.FTMS_app.customer.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -14,38 +11,40 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder // <-- Util pentru teste/service
+@ToString(exclude = "customer") // <-- CRITIC: Rupe bucla infinită
 public class Contract {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne // Relația inversă
+    @OneToOne(fetch = FetchType.LAZY) // Performanță: Nu încărca clientul decât dacă e nevoie
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    @Column(nullable = false)
     private LocalDate startDate;
+
+    @Column(nullable = false)
     private LocalDate endDate;
 
-    // Aici ar putea fi definite mai multe reguli
-    private String serviceLevel; // "standard", "express"
-    private double discountRate; // ex: 0.10 pentru 10%
+    @Enumerated(EnumType.STRING) // <-- Folosim Enum pentru siguranță
+    private ServiceLevel serviceLevel;
 
-    // --- Logica de Business ---
+    private double discountRate; // 0.10 pentru 10%
 
-    /**
-     * Verifică dacă contractul este activ în prezent.
-     */
+    // --- Logica de Business (Perfectă) ---
+
     public boolean isActive() {
         LocalDate now = LocalDate.now();
+        // Logica ta este corectă: inclusive start, inclusive end
         return !now.isBefore(startDate) && !now.isAfter(endDate);
     }
 
-    /**
-     * Verifică dacă contractul este pe cale să expire (ex: în 30 de zile).
-     */
     public boolean isNearingExpiry(int daysBeforeExpiry) {
         LocalDate expiryWarningDate = endDate.minusDays(daysBeforeExpiry);
+        // Verificăm dacă suntem în intervalul de avertizare (după data de alertă, dar înainte de expirare)
         return LocalDate.now().isAfter(expiryWarningDate) && !LocalDate.now().isAfter(endDate);
     }
 }

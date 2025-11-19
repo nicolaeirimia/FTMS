@@ -20,7 +20,7 @@ public interface ShipmentService {
     /**
      * Use Case: Anularea unui transport.
      */
-    void cancelShipment(Long shipmentId);
+    Shipment cancelShipment(Long shipmentId);
 
     /**
      * Use Case: Actualizarea statusului (ex: PICKED_UP, IN_TRANSIT).

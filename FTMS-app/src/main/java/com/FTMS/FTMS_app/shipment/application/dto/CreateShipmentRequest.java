@@ -1,7 +1,7 @@
 package com.FTMS.FTMS_app.shipment.application.dto;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent; // Alternativă mai flexibilă
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -12,33 +12,32 @@ import java.time.LocalDateTime;
 @Data
 public class CreateShipmentRequest {
 
-    @NotEmpty
+    @NotEmpty(message = "Reference number is required")
     private String referenceNumber;
 
-    @NotNull
+    @NotNull(message = "Customer ID is required")
     private Long customerId;
 
-    @NotNull
-    @Valid // Asigură validarea obiectului interior
+    @NotNull(message = "Pickup location is required")
+    @Valid // Validează interiorul obiectului ShipmentLocationDto
     private ShipmentLocationDto pickupLocation;
 
-    @NotNull
+    @NotNull(message = "Delivery location is required")
     @Valid
     private ShipmentLocationDto deliveryLocation;
 
-    @NotNull
+    @NotNull(message = "Cargo details are required")
     @Valid
     private CargoDto cargoDetails;
 
-    @NotNull
-    @Future(message = "Pickup time must be in the future.")
+    @NotNull(message = "Pickup time is required")
+    @FutureOrPresent(message = "Pickup time must be in the present or future")
     private LocalDateTime pickupDateTime;
 
-    @NotNull
-    @Future(message = "Delivery time must be in the future.")
+    @NotNull(message = "Delivery time is required")
+    @FutureOrPresent(message = "Delivery time must be in the present or future")
     private LocalDateTime requestedDeliveryDateTime;
 
-    // Adăugăm un câmp pentru prețul cursei, necesar pentru facturare
-    @Min(1)
+    @Min(value = 1, message = "Price must be positive")
     private double price;
 }

@@ -1,16 +1,28 @@
 package com.FTMS.FTMS_app.customer.application.dto;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AddressDto {
-    @NotEmpty
+
+    @NotBlank(message = "Street is required")
     private String street;
-    @NotEmpty
+
+    @NotBlank(message = "City is required")
     private String city;
-    private String state;
-    @NotEmpty
+
+    private String state; // Rămâne opțional (multe țări nu folosesc state/județe la adrese)
+
+    @NotBlank(message = "Zip code is required")
     private String zipCode;
+
+    @NotBlank(message = "Country is required") // <-- CRITIC: Acum este obligatoriu
     private String country;
 }

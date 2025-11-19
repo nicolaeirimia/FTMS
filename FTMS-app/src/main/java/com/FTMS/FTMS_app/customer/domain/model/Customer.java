@@ -1,10 +1,9 @@
 package com.FTMS.FTMS_app.customer.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,36 +14,52 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder // <-- Foarte util pentru teste
+@ToString(exclude = "contract") // <-- CRITIC: Rupe bucla infinită
 public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Company name is required")
     @Column(nullable = false)
     private String companyName;
 
+    @NotBlank(message = "Tax ID is required")
     @Column(unique = true, nullable = false)
     private String taxIdNumber; // CUI
 
     @Column(unique = true)
     private String registrationNumber; // Nr. Reg. Com.
 
-    // Presupunem că folosim un VO ContactInfo similar cu cel din fleet
-    // Dar pentru a fi simplu, folosim câmpuri simple
+    // Contact Info Simplificat (E OK să fie plat aici)
+    @NotBlank
     private String primaryContactName;
+
+    @NotBlank
     private String primaryContactPhone;
+
+    @Email
     @Column(unique = true)
     private String primaryContactEmail;
 
     @Embedded // Adresa de facturare
-    @AttributeOverride(name = "street", column = @Column(name = "billing_street"))
-    @AttributeOverride(name = "city", column = @Column(name = "billing_city"))
-    // ... pot fi redenumite toate câmpurile dacă e nevoie
+    @AttributeOverrides({
+            @AttributeOverride(name = "street", column = @Column(name = "billing_street")),
+            @AttributeOverride(name = "city", column = @Column(name = "billing_city")),
+            @AttributeOverride(name = "state", column = @Column(name = "billing_state")),
+            @AttributeOverride(name = "zipCode", column = @Column(name = "billing_zip")),
+            @AttributeOverride(name = "country", column = @Column(name = "billing_country"))
+    })
     private Address billingAddress;
 
-    @ElementCollection // O listă de adrese embeddable (Value Objects)
-    @CollectionTable(name = "customer_delivery_addresses", joinColumns = @JoinColumn(name = "customer_id"))
+    @Builder.Default // <-- CRITIC: Asigură că lista nu e null când folosim Builder
+    @ElementCollection // Hibernate creează tabelul 'customer_delivery_addresses'
+    @CollectionTable(
+            name = "customer_delivery_addresses",
+            joinColumns = @JoinColumn(name = "customer_id")
+    )
     private List<Address> deliveryAddresses = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -63,27 +78,14 @@ public class Customer {
 
     // --- Logica de Business ---
 
-    /**
-     * Verifică dacă clientul poate plasa o comandă nouă.
-     */
     public boolean canPlaceNewShipment() {
-        // Cerință: "Customers with overdue invoices exceeding their credit limit... new shipment requests.http are blocked"
-        // Logica aceasta (verificarea facturilor) va fi probabil în CustomerService,
-        // deoarece Customer nu are acces direct la InvoiceRepository.
-        // Aici verificăm doar statusul.
         return this.status == CustomerStatus.ACTIVE;
     }
 
-    /**
-     * Suspendă contul clientului.
-     */
     public void suspendAccount() {
         this.status = CustomerStatus.SUSPENDED;
     }
 
-    /**
-     * Reactivează contul clientului.
-     */
     public void activateAccount() {
         if (this.status == CustomerStatus.SUSPENDED) {
             this.status = CustomerStatus.ACTIVE;
@@ -91,6 +93,17 @@ public class Customer {
     }
 
     public void addDeliveryAddress(Address address) {
+        if (this.deliveryAddresses == null) {
+            this.deliveryAddresses = new ArrayList<>();
+        }
         this.deliveryAddresses.add(address);
+    }
+
+    // Helper pentru a seta contractul și a menține relația bidirecțională
+    public void setContract(Contract contract) {
+        this.contract = contract;
+        if (contract != null && contract.getCustomer() != this) {
+            contract.setCustomer(this);
+        }
     }
 }

@@ -3,29 +3,30 @@ package com.FTMS.FTMS_app.customer.domain.model;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
-import lombok.Getter; // <-- ACEASTA LIPSEA CEL MAI PROBABIL
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Embeddable
-@Getter // <-- ASIGURĂ-TE CĂ ACEASTĂ LINIE EXISTĂ
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder            // <-- Util pentru a crea obiectul în CustomerServiceImpl
+@ToString           // <-- Util pentru debug
+@EqualsAndHashCode  // <-- Critic pentru Value Objects
 public class PaymentDetails {
 
-    public enum PaymentMethod {
-        BANK_TRANSFER,
-        CREDIT_CARD,
-        CASH
-    }
-
+    @NotNull
     private LocalDate paymentDate;
-    private double amount; // @Getter va crea automat getAmount() pentru acest câmp
+
+    @Min(value = 0, message = "Payment amount must be positive")
+    private double amount;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    @NotNull
+    private PaymentMethod paymentMethod; // Folosește enum-ul extras
 
     private String referenceNumber;
 }

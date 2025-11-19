@@ -1,6 +1,6 @@
 package com.FTMS.FTMS_app.customer.application.dto;
 
-import com.FTMS.FTMS_app.customer.domain.model.PaymentDetails;
+import com.FTMS.FTMS_app.customer.domain.model.PaymentMethod; // <-- IMPORTANT: Importul corect
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +18,7 @@ public class ProcessPaymentRequest {
     private double amount;
 
     @NotNull
-    private PaymentDetails.PaymentMethod paymentMethod;
+    private PaymentMethod paymentMethod; // Folosește enum-ul din domeniul model
 
     @NotEmpty
     private String referenceNumber;

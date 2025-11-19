@@ -1,10 +1,7 @@
 package com.FTMS.FTMS_app.shipment.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +11,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@ToString(exclude = "shipment") // <-- CRITIC: Rupe bucla infinită cu Shipment
 public class DeliveryConfirmation {
 
     @Id
@@ -21,21 +20,19 @@ public class DeliveryConfirmation {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shipment_id", nullable = false) // Legătura inversă
+    @JoinColumn(name = "shipment_id", nullable = false) // Cheia străină este aici
     private Shipment shipment;
 
     private LocalDateTime actualDeliveryDateTime;
-    private String recipientName;
-    private String recipientSignature; // Ar putea fi o cale către o imagine
-    private String issuesOrDamages;
-    private String photoDocumentationUrl; // Cale către poza
 
-    public DeliveryConfirmation(Shipment shipment, LocalDateTime actualDeliveryDateTime, String recipientName, String recipientSignature, String issuesOrDamages, String photoDocumentationUrl) {
-        this.shipment = shipment;
-        this.actualDeliveryDateTime = actualDeliveryDateTime;
-        this.recipientName = recipientName;
-        this.recipientSignature = recipientSignature;
-        this.issuesOrDamages = issuesOrDamages;
-        this.photoDocumentationUrl = photoDocumentationUrl;
-    }
+    private String recipientName;
+
+    private String recipientSignature; // URL sau Base64 string
+
+    private String issuesOrDamages; // Null dacă totul e ok
+
+    private String photoDocumentationUrl; // URL către cloud storage (S3/MinIO)
+
+    // Constructorul manual nu mai este necesar dacă ai @Builder,
+    // dar îl poți păstra dacă îți place.
 }

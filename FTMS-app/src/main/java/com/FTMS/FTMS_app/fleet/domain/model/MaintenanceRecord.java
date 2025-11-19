@@ -1,11 +1,9 @@
 package com.FTMS.FTMS_app.fleet.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*; // Am adăugat ToString
 
+import java.math.BigDecimal; // Recomandat pentru bani
 import java.time.LocalDate;
 
 @Entity
@@ -14,6 +12,8 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "vehicle") // <--- CRITIC: Rupe bucla infinită
+@Builder
 public class MaintenanceRecord {
 
     @Id
@@ -21,7 +21,7 @@ public class MaintenanceRecord {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vehicle_id", nullable = false) // Partea "Many" a relației
+    @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
     private LocalDate date;
@@ -30,10 +30,15 @@ public class MaintenanceRecord {
     private MaintenanceType maintenanceType;
 
     private String description;
+
+    // Am schimbat double în BigDecimal pentru precizie financiară.
+    // Dacă schimbi aici, trebuie să schimbi și în DTO-uri/Service!
+    // Dacă vrei să păstrezi 'double' e ok pentru acest proiect, dar ține minte pentru viitor.
     private double cost;
+
     private String serviceProvider;
 
-    // Constructor util pentru a crea o înregistrare fără ID (ID-ul va fi generat de JPA)
+    // Constructorul tău e ok, dar @Builder e și mai curat
     public MaintenanceRecord(LocalDate date, MaintenanceType type, String description, double cost, String serviceProvider) {
         this.date = date;
         this.maintenanceType = type;

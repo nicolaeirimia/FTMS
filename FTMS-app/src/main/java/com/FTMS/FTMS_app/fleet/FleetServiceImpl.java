@@ -1,4 +1,4 @@
-package com.FTMS.FTMS_app.fleet.application.service.impl;
+package com.FTMS.FTMS_app.fleet;
 
 import com.FTMS.FTMS_app.fleet.application.dto.CreateDriverRequest;
 import com.FTMS.FTMS_app.fleet.application.dto.CreateVehicleRequest;

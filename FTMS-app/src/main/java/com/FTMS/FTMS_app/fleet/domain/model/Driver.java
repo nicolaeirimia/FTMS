@@ -1,10 +1,7 @@
 package com.FTMS.FTMS_app.fleet.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*; // Am adăugat Builder și ToString
 
 import java.time.LocalDate;
 
@@ -14,20 +11,20 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder // <-- Util pentru teste
+@ToString(exclude = "primaryVehicle") // <-- Evită bucle infinite dacă Vehicle are referință înapoi la Driver
 public class Driver {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name; // Numele șoferului
+    @Column(nullable = false) // Validare DB: Numele e obligatoriu
+    private String name;
 
     @Embedded
     private LicenseInfo licenseInfo;
 
-    // --- MODIFICARE AICI ---
-    // Am adăugat @AttributeOverrides (plural) pentru a redenumi TOATE
-    // câmpurile din ContactInfo, inclusiv 'address' și 'email'.
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "name", column = @Column(name = "primary_contact_name")),
@@ -37,8 +34,6 @@ public class Driver {
     })
     private ContactInfo contactDetails;
 
-    // --- MODIFICARE AICI ---
-    // Am completat @AttributeOverrides pentru a include și 'address' și 'email'.
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "name", column = @Column(name = "emergency_contact_name")),
@@ -53,22 +48,28 @@ public class Driver {
     @Enumerated(EnumType.STRING)
     private DriverStatus status;
 
-    @OneToOne
-    @JoinColumn(name = "primary_vehicle_id") // Cheia străină va fi în tabelul drivers
+    @OneToOne(fetch = FetchType.LAZY) // Performanță: Nu încărca vehiculul dacă nu e nevoie
+    @JoinColumn(name = "primary_vehicle_id")
     private Vehicle primaryVehicle;
 
-    // --- Logica de Business (rămâne neschimbată) ---
+    // --- Logica de Business Îmbunătățită (Null Safety) ---
 
     public boolean isAvailable() {
-        return this.status == DriverStatus.AVAILABLE && licenseInfo.isValid();
+        // Verificăm dacă licenseInfo există înainte să apelăm metode pe el
+        return this.status == DriverStatus.AVAILABLE
+                && licenseInfo != null
+                && licenseInfo.isValid();
     }
 
     public boolean canDriveVehicle(Vehicle vehicle) {
+        if (vehicle == null || licenseInfo == null) return false; // Safety check
+
         return licenseInfo.getLicenseType() == LicenseType.CE ||
                 (licenseInfo.getLicenseType() == LicenseType.C &&
                         (vehicle.getVehicleType() != VehicleType.TANKER && vehicle.getVehicleType() != VehicleType.FLATBED));
     }
 
+    // Restul metodelor rămân la fel
     public void assignToShipment() {
         if (!isAvailable()) {
             throw new IllegalStateException("Driver " + name + " is not available for assignment.");

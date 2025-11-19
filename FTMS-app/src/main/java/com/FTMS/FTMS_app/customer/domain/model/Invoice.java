@@ -1,10 +1,9 @@
 package com.FTMS.FTMS_app.customer.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*; // Builder, ToString, etc.
 
 import java.time.LocalDate;
 
@@ -14,12 +13,15 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder // <-- Esențial pentru generarea facturii în Service
+@ToString(exclude = "customer") // <-- Previne încărcarea Lazy a clientului doar pentru un log
 public class Invoice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(unique = true, nullable = false)
     private String invoiceNumber;
 
@@ -28,24 +30,28 @@ public class Invoice {
     private Customer customer;
 
     @Column(nullable = false)
-    private Long shipmentId; // Referință către transportul facturat
+    private Long shipmentId; // Referință externă (Loose Coupling)
 
     private LocalDate issueDate;
     private LocalDate dueDate;
 
-    private double amount;
-    private double taxes;
-    private double totalAmount;
+    @Min(0)
+    private double amount;      // Valoarea serviciilor
+
+    @Min(0)
+    private double taxes;       // TVA
+
+    @Min(0)
+    private double totalAmount; // Total de plată
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private InvoiceStatus status;
 
-
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "paymentDate", column = @Column(name = "payment_date")),
-            @AttributeOverride(name = "amount", column = @Column(name = "payment_amount")),
+            @AttributeOverride(name = "amount", column = @Column(name = "payment_amount")), // Soluția critică
             @AttributeOverride(name = "paymentMethod", column = @Column(name = "payment_method")),
             @AttributeOverride(name = "referenceNumber", column = @Column(name = "payment_reference_number"))
     })
@@ -53,23 +59,20 @@ public class Invoice {
 
     // --- Logica de Business ---
 
-    /**
-     * Marchează factura ca fiind plătită.
-     */
     public void recordPayment(PaymentDetails details) {
-        if (details.getAmount() == this.totalAmount) {
+        // Folosim un epsilon mic pentru compararea double-urilor, e mai sigur
+        double epsilon = 0.001;
+
+        if (Math.abs(details.getAmount() - this.totalAmount) < epsilon) {
             this.status = InvoiceStatus.PAID;
         } else if (details.getAmount() < this.totalAmount) {
-            // Aici logica de business poate dicta dacă acceptăm plăți parțiale
             this.status = InvoiceStatus.PARTIALLY_PAID;
         }
+        // Dacă plătește mai mult, tot PAID rămâne (sau logică de creditare viitoare)
+
         this.paymentDetails = details;
     }
 
-    /**
-     * Marchează factura ca fiind restantă (overdue).
-     * Acest lucru va fi apelat de un proces extern (un "job" programat).
-     */
     public void markAsOverdue() {
         if (this.status == InvoiceStatus.PENDING && LocalDate.now().isAfter(dueDate)) {
             this.status = InvoiceStatus.OVERDUE;

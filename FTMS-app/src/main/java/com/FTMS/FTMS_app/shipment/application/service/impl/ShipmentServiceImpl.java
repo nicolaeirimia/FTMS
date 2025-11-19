@@ -19,14 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ShipmentServiceImpl implements ShipmentService {
 
     private final ShipmentRepository shipmentRepository;
-
-    // Injectarea serviciilor din celelalte module
     private final FleetService fleetService;
     private final CustomerService customerService;
 
-    // Stocăm și prețul cursei (necesar pentru facturare)
-    // Într-o aplicație reală, prețul ar fi calculat de un al 4-lea modul (Pricing)
-    // Aici îl luăm din DTO.
     private double shipmentPrice;
 
     public ShipmentServiceImpl(ShipmentRepository shipmentRepository,
@@ -40,47 +35,44 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     @Transactional
     public Shipment createShipment(CreateShipmentRequest request) {
-        // 1. Validare cross-modul: Verifică clientul
         Customer customer = customerService.getCustomerById(request.getCustomerId());
         if (!customer.canPlaceNewShipment()) {
             throw new IllegalStateException("Customer " + customer.getCompanyName() + " is suspended and cannot place new shipments.");
         }
 
-        // Verifică unicitatea referenceNumber
         shipmentRepository.findByReferenceNumber(request.getReferenceNumber())
                 .ifPresent(s -> { throw new IllegalArgumentException("Shipment with reference number " + request.getReferenceNumber() + " already exists."); });
 
-        // Salvează prețul pentru facturare
         this.shipmentPrice = request.getPrice();
 
-        // 2. Mapare DTO -> Model
+        // Mapare DTO -> Value Objects
         ShipmentContactLocation pickup = mapToLocation(request.getPickupLocation());
         ShipmentContactLocation delivery = mapToLocation(request.getDeliveryLocation());
         CargoDetails cargo = mapToCargo(request.getCargoDetails());
 
-        Shipment shipment = new Shipment(
-                request.getReferenceNumber(),
-                request.getCustomerId(),
-                pickup,
-                delivery,
-                cargo,
-                request.getPickupDateTime(),
-                request.getRequestedDeliveryDateTime()
-        );
+        // --- MODIFICARE AICI (Folosim Builder în loc de Constructor) ---
+        Shipment shipment = Shipment.builder()
+                .referenceNumber(request.getReferenceNumber())
+                .customerId(request.getCustomerId())
+                .pickupLocation(pickup)
+                .deliveryLocation(delivery)
+                .cargoDetails(cargo)
+                .pickupDateTime(request.getPickupDateTime())
+                .requestedDeliveryDateTime(request.getRequestedDeliveryDateTime())
+                .status(ShipmentStatus.PENDING) // Setăm explicit statusul inițial
+                .build();
+        // ---------------------------------------------------------------
 
-        // 3. Salvare
         return shipmentRepository.save(shipment);
     }
 
     @Override
     @Transactional
     public Shipment assignShipment(Long shipmentId, Long driverId, Long vehicleId) {
-        // 1. Găsește toate agregatele
         Shipment shipment = getShipmentById(shipmentId);
         Driver driver = fleetService.getDriverById(driverId);
         Vehicle vehicle = fleetService.getVehicleById(vehicleId);
 
-        // 2. Validări de Business (Reguli)
         if (!shipment.canBeAssigned()) {
             throw new IllegalStateException("Shipment is already processed.");
         }
@@ -99,11 +91,8 @@ public class ShipmentServiceImpl implements ShipmentService {
             throw new IllegalArgumentException("Vehicle capacity is not sufficient for this cargo.");
         }
 
-        // 3. Orchestrează modificările (APELEAZĂ SERVICIILE)
         fleetService.assignDriver(driverId);
         fleetService.assignVehicle(vehicleId);
-
-        // Apelează logica de domeniu din Shipment
         shipment.assign(driverId, vehicleId);
 
         return shipmentRepository.save(shipment);
@@ -111,10 +100,9 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     @Transactional
-    public void cancelShipment(Long shipmentId) {
+    public Shipment cancelShipment(Long shipmentId) {
         Shipment shipment = getShipmentById(shipmentId);
 
-        // Dacă resursele erau alocate, eliberează-le
         if (shipment.getAssignedDriverId() != null) {
             fleetService.releaseDriver(shipment.getAssignedDriverId());
         }
@@ -122,9 +110,8 @@ public class ShipmentServiceImpl implements ShipmentService {
             fleetService.releaseVehicle(shipment.getAssignedVehicleId());
         }
 
-        // Apelează logica de domeniu
         shipment.cancel();
-        shipmentRepository.save(shipment);
+        return shipmentRepository.save(shipment);
     }
 
     @Override
@@ -132,7 +119,6 @@ public class ShipmentServiceImpl implements ShipmentService {
     public Shipment updateShipmentStatus(Long shipmentId, ShipmentStatus newStatus) {
         Shipment shipment = getShipmentById(shipmentId);
 
-        // O mașină de stări simplă
         switch (newStatus) {
             case PICKED_UP:
                 shipment.markAsPickedUp();
@@ -149,30 +135,26 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     @Transactional
     public Shipment confirmDelivery(Long shipmentId, DeliveryConfirmationDto dto) {
-        // 1. Găsește cursa
         Shipment shipment = getShipmentById(shipmentId);
 
-        // 2. Mapare DTO -> Model
-        DeliveryConfirmation confirmation = new DeliveryConfirmation(
-                shipment,
-                dto.getActualDeliveryDateTime(),
-                dto.getRecipientName(),
-                dto.getRecipientSignature(),
-                dto.getIssuesOrDamages(),
-                dto.getPhotoDocumentationUrl()
-        );
+        // --- MODIFICARE AICI (Folosim Builder) ---
+        DeliveryConfirmation confirmation = DeliveryConfirmation.builder()
+                .shipment(shipment)
+                .actualDeliveryDateTime(dto.getActualDeliveryDateTime())
+                .recipientName(dto.getRecipientName())
+                .recipientSignature(dto.getRecipientSignature())
+                .issuesOrDamages(dto.getIssuesOrDamages())
+                .photoDocumentationUrl(dto.getPhotoDocumentationUrl())
+                .build();
+        // -----------------------------------------
 
-        // 3. Apelează logica de domeniu
         shipment.completeDelivery(confirmation);
 
-        // 4. Eliberează resursele
         fleetService.releaseDriver(shipment.getAssignedDriverId());
         fleetService.releaseVehicle(shipment.getAssignedVehicleId());
 
         Shipment savedShipment = shipmentRepository.save(shipment);
 
-        // 5. REGULA DE BUSINESS: Generează factura
-        // (Prețul este stocat temporar în acest serviciu - vezi createShipment)
         customerService.generateInvoice(shipment.getCustomerId(), shipmentId, this.shipmentPrice);
 
         return savedShipment;
@@ -182,12 +164,15 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Transactional(readOnly = true)
     public Shipment getShipmentById(Long id) {
         return shipmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + id)); // Excepție custom
+                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + id));
     }
 
-    // --- Metode Utilitare Private (Mapare) ---
+    // --- Helpers ---
 
     private ShipmentContactLocation mapToLocation(ShipmentLocationDto dto) {
+        // Aici folosim constructorul sau builder-ul din ShipmentContactLocation.
+        // Dacă ai pus @Builder pe ShipmentContactLocation, poți folosi .builder() și aici.
+        // Dacă nu, constructorul este ok.
         return new ShipmentContactLocation(
                 dto.getStreet(), dto.getCity(), dto.getZipCode(), dto.getCountry(),
                 dto.getContactPerson(), dto.getContactPhone()
@@ -195,9 +180,13 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     private CargoDetails mapToCargo(CargoDto dto) {
-        return new CargoDetails(
-                dto.getDescription(), dto.getWeightKg(), dto.getVolumeCubicMeters(),
-                dto.getSpecialHandlingRequirements(), dto.getAdditionalNotes()
-        );
+        // La fel, putem folosi Builder dacă l-am adăugat pe CargoDetails
+        return CargoDetails.builder()
+                .description(dto.getDescription())
+                .weightKg(dto.getWeightKg())
+                .volumeCubicMeters(dto.getVolumeCubicMeters())
+                .specialHandlingRequirements(dto.getSpecialHandlingRequirements())
+                .additionalNotes(dto.getAdditionalNotes())
+                .build();
     }
 }

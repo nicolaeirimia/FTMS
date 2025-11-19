@@ -3,10 +3,7 @@ package com.FTMS.FTMS_app.customer.application.dto;
 import com.FTMS.FTMS_app.customer.domain.model.CustomerCategory;
 import com.FTMS.FTMS_app.customer.domain.model.PaymentTerms;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
@@ -14,37 +11,38 @@ import java.util.List;
 @Data
 public class CreateCustomerRequest {
 
-    @NotEmpty
+    @NotBlank(message = "Company name is required")
     private String companyName;
 
-    @NotEmpty(message = "Tax ID Number (CUI) is required.")
+    @NotBlank(message = "Tax ID Number (CUI) is required")
     private String taxIdNumber;
 
-    private String registrationNumber;
+    private String registrationNumber; // Opțional
 
-    @NotEmpty
+    @NotBlank(message = "Primary contact name is required")
     private String primaryContactName;
 
-    @NotEmpty
+    @NotBlank(message = "Primary contact phone is required")
+    @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Invalid phone number format")
     private String primaryContactPhone;
 
-    @NotEmpty
-    @Email(message = "A valid email is required.")
+    @NotBlank(message = "Primary contact email is required")
+    @Email(message = "Invalid email format")
     private String primaryContactEmail;
 
-    @NotNull
-    @Valid // Validează și câmpurile din AddressDto
+    @NotNull(message = "Billing address is required")
+    @Valid // Validează recursiv interiorul obiectului
     private AddressDto billingAddress;
 
-    @Valid
+    @Valid // Validează fiecare adresă din listă
     private List<AddressDto> deliveryAddresses;
 
-    @NotNull
+    @NotNull(message = "Payment terms are required")
     private PaymentTerms paymentTerms;
 
-    @NotNull
+    @NotNull(message = "Customer category is required")
     private CustomerCategory category;
 
-    @Min(0)
+    @Min(value = 0, message = "Credit limit cannot be negative")
     private double creditLimit;
 }

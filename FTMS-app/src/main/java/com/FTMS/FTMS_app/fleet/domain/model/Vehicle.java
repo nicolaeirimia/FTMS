@@ -1,9 +1,7 @@
 package com.FTMS.FTMS_app.fleet.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*; // Builder, ToString
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -12,8 +10,11 @@ import java.util.List;
 @Entity
 @Table(name = "vehicles")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder // <-- FOARTE UTIL pentru teste (CreateVehicleRequest -> Vehicle)
+@ToString(exclude = "maintenanceHistory") // <-- CRITIC: Rupe bucla infinită cu MaintenanceRecord
 public class Vehicle {
 
     @Id
@@ -45,23 +46,18 @@ public class Vehicle {
     @Column(nullable = false)
     private VehicleStatus status;
 
+    @Builder.Default // Necesar dacă folosim @Builder, ca să nu fie null lista
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MaintenanceRecord> maintenanceHistory = new ArrayList<>();
 
-    // --- Logica de Business ---
+    // --- Logica de Business (Rămâne neschimbată - e perfectă) ---
 
-    /**
-     * Verifică dacă vehiculul este disponibil pentru o cursă.
-     */
     public boolean isAvailable() {
         return this.status == VehicleStatus.AVAILABLE &&
                 !insuranceExpiryDate.isBefore(LocalDate.now()) &&
                 !registrationExpiryDate.isBefore(LocalDate.now());
     }
 
-    /**
-     * Programează vehiculul pentru mentenanță.
-     */
     public void scheduleMaintenance() {
         if (this.status == VehicleStatus.IN_USE) {
             throw new IllegalStateException("Cannot schedule maintenance, vehicle is currently in use.");
@@ -69,23 +65,15 @@ public class Vehicle {
         this.status = VehicleStatus.IN_MAINTENANCE;
     }
 
-    /**
-     * Marchează mentenanța ca fiind completă și adaugă o înregistrare.
-     */
     public void completeMaintenance(MaintenanceRecord record) {
         if (this.status != VehicleStatus.IN_MAINTENANCE) {
             throw new IllegalStateException("Vehicle is not in maintenance.");
         }
-
-        // Setează relația bidirecțională
-        record.setVehicle(this);
+        record.setVehicle(this); // Legătura critică
         this.maintenanceHistory.add(record);
         this.status = VehicleStatus.AVAILABLE;
     }
 
-    /**
-     * Alocă vehiculul unei curse.
-     */
     public void assignToShipment() {
         if (!isAvailable()) {
             throw new IllegalStateException("Vehicle " + registrationNumber + " is not available for assignment.");
@@ -93,9 +81,6 @@ public class Vehicle {
         this.status = VehicleStatus.IN_USE;
     }
 
-    /**
-     * Eliberează vehiculul după finalizarea cursei.
-     */
     public void releaseFromShipment() {
         if (this.status == VehicleStatus.IN_USE) {
             this.status = VehicleStatus.AVAILABLE;

@@ -7,37 +7,34 @@ import com.FTMS.FTMS_app.customer.domain.model.Contract;
 import com.FTMS.FTMS_app.customer.domain.model.Customer;
 import com.FTMS.FTMS_app.customer.domain.model.Invoice;
 
+import java.util.List;
+
 public interface CustomerService {
 
-    /**
-     * Use Case: Înregistrarea unui client nou.
-     */
+    // --- Management Clienți ---
     Customer createCustomer(CreateCustomerRequest request);
 
     /**
-     * Use Case: Adăugarea unui contract pentru un client.
+     * Permite actualizarea datelor (ex: adresa, telefon).
+     * Presupunem că folosim același DTO sau unul specific Update.
      */
+    Customer updateCustomer(Long id, CreateCustomerRequest request);
+
+    Customer getCustomerById(Long id);
+
+    // --- Management Contracte ---
     Contract addContractToCustomer(CreateContractRequest request);
 
-    /**
-     * Use Case: Procesarea unei plăți pentru o factură.
-     */
+    // --- Management Financiar ---
+    Invoice generateInvoice(Long customerId, Long shipmentId, double amount);
+
     Invoice processPayment(Long invoiceId, ProcessPaymentRequest request);
 
     /**
-     * Use Case: Verificarea limitelor de credit și suspendarea conturilor.
-     * Aceasta implementează regula de business din cerințe.
+     * Returnează istoricul facturilor pentru un client.
      */
+    List<Invoice> getInvoicesForCustomer(Long customerId);
+
+    // --- Reguli de Business / Audit ---
     void checkCustomerOverdueStatus(Long customerId);
-
-    /**
-     * Use Case: Generarea unei facturi (va fi apelat de modulul Shipment).
-     * Definim doar "scheletul" acum.
-     */
-    Invoice generateInvoice(Long customerId, Long shipmentId, double amount);
-
-    /**
-     * Metodă utilitară pentru a obține un client.
-     */
-    Customer getCustomerById(Long id);
 }
