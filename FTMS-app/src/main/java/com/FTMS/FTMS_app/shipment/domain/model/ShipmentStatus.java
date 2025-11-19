@@ -17,13 +17,10 @@ public enum ShipmentStatus {
         this.displayName = displayName;
     }
 
-    /**
-     * Verifică dacă este permisă trecerea la noul status.
-     * (Logica de State Machine)
-     */
+
     public boolean canTransitionTo(ShipmentStatus newStatus) {
         if (this == newStatus) return true;
-        if (this == CANCELED || this == DELIVERED) return false; // Stări finale
+        if (this == CANCELED || this == DELIVERED) return false;
 
         return switch (this) {
             case PENDING -> newStatus == SCHEDULED || newStatus == CANCELED;

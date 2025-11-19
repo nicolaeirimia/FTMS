@@ -30,7 +30,7 @@ public class CreateVehicleRequest {
     @Min(value = 1, message = "Volume capacity must be positive")
     private double maxVolumeCubicMeters;
 
-    @NotEmpty(message = "Fuel type is required") // <-- ADAUGAT
+    @NotEmpty(message = "Fuel type is required")
     private String fuelType;
 
     @Min(0)

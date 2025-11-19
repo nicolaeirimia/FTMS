@@ -20,9 +20,9 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
             "AND v.capacity.maxWeightKg >= :weight " +
             "AND v.capacity.maxVolumeCubicMeters >= :volume")
     List<Vehicle> findAvailableVehiclesByCapacity(
-            @Param("status") VehicleStatus status, // <-- Leagă :status de variabila status
-            @Param("weight") double weight,        // <-- Leagă :weight de variabila weight
-            @Param("volume") double volume         // <-- Leagă :volume de variabila volume
+            @Param("status") VehicleStatus status,
+            @Param("weight") double weight,
+            @Param("volume") double volume
     );
 
     List<Vehicle> findByStatus(VehicleStatus status);

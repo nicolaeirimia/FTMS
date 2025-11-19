@@ -68,18 +68,18 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.save(customer);
     }
 
-    // --- METODA LIPSĂ 1: Update Customer ---
+
     @Override
     public Customer updateCustomer(Long id, CreateCustomerRequest request) {
         Customer customer = getCustomerById(id);
 
-        // Actualizăm câmpurile (într-o aplicație reală am verifica null-urile)
+
         customer.setCompanyName(request.getCompanyName());
         customer.setPrimaryContactName(request.getPrimaryContactName());
         customer.setPrimaryContactPhone(request.getPrimaryContactPhone());
         customer.setPrimaryContactEmail(request.getPrimaryContactEmail());
         customer.setBillingAddress(mapToAddress(request.getBillingAddress()));
-        // ... alte câmpuri după nevoie
+
 
         return customerRepository.save(customer);
     }
@@ -88,7 +88,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Contract addContractToCustomer(CreateContractRequest request) {
         Customer customer = getCustomerById(request.getCustomerId());
 
-// Nu mai faci nimic, e deja Enum!
+
         ServiceLevel serviceLevel = request.getServiceLevel();
         Contract contract = Contract.builder()
                 .customer(customer)
@@ -115,7 +115,7 @@ public class CustomerServiceImpl implements CustomerService {
         PaymentDetails paymentDetails = PaymentDetails.builder()
                 .paymentDate(request.getPaymentDate())
                 .amount(request.getAmount())
-                .paymentMethod(request.getPaymentMethod()) // Acum ar trebui să meargă
+                .paymentMethod(request.getPaymentMethod())
                 .referenceNumber(request.getReferenceNumber())
                 .build();
 
@@ -173,7 +173,7 @@ public class CustomerServiceImpl implements CustomerService {
         return invoiceRepository.save(invoice);
     }
 
-    // --- METODA LIPSĂ 2: Get Invoices ---
+
     @Override
     @Transactional(readOnly = true)
     public List<Invoice> getInvoicesForCustomer(Long customerId) {
@@ -188,7 +188,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
     }
 
-    // Helper
+
     private Address mapToAddress(AddressDto dto) {
         return Address.builder()
                 .street(dto.getStreet())

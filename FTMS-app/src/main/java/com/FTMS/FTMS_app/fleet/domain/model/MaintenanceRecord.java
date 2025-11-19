@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "vehicle") // <--- CRITIC: Rupe bucla infinită
+@ToString(exclude = "vehicle")
 @Builder
 public class MaintenanceRecord {
 
@@ -31,14 +31,12 @@ public class MaintenanceRecord {
 
     private String description;
 
-    // Am schimbat double în BigDecimal pentru precizie financiară.
-    // Dacă schimbi aici, trebuie să schimbi și în DTO-uri/Service!
-    // Dacă vrei să păstrezi 'double' e ok pentru acest proiect, dar ține minte pentru viitor.
+
     private double cost;
 
     private String serviceProvider;
 
-    // Constructorul tău e ok, dar @Builder e și mai curat
+
     public MaintenanceRecord(LocalDate date, MaintenanceType type, String description, double cost, String serviceProvider) {
         this.date = date;
         this.maintenanceType = type;

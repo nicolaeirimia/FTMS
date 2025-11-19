@@ -20,6 +20,6 @@ public class CargoDto {
     @Min(value = 1, message = "Volume must be at least 1 cubic meter")
     private double volumeCubicMeters;
 
-    private String specialHandlingRequirements; // Opțional
-    private String additionalNotes;             // Opțional
+    private String specialHandlingRequirements;
+    private String additionalNotes;
 }

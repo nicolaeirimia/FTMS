@@ -13,8 +13,8 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder // <-- Esențial pentru generarea facturii în Service
-@ToString(exclude = "customer") // <-- Previne încărcarea Lazy a clientului doar pentru un log
+@Builder
+@ToString(exclude = "customer")
 public class Invoice {
 
     @Id
@@ -30,19 +30,19 @@ public class Invoice {
     private Customer customer;
 
     @Column(nullable = false)
-    private Long shipmentId; // Referință externă (Loose Coupling)
+    private Long shipmentId;
 
     private LocalDate issueDate;
     private LocalDate dueDate;
 
     @Min(0)
-    private double amount;      // Valoarea serviciilor
+    private double amount;
 
     @Min(0)
-    private double taxes;       // TVA
+    private double taxes;
 
     @Min(0)
-    private double totalAmount; // Total de plată
+    private double totalAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -51,16 +51,16 @@ public class Invoice {
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "paymentDate", column = @Column(name = "payment_date")),
-            @AttributeOverride(name = "amount", column = @Column(name = "payment_amount")), // Soluția critică
+            @AttributeOverride(name = "amount", column = @Column(name = "payment_amount")),
             @AttributeOverride(name = "paymentMethod", column = @Column(name = "payment_method")),
             @AttributeOverride(name = "referenceNumber", column = @Column(name = "payment_reference_number"))
     })
     private PaymentDetails paymentDetails;
 
-    // --- Logica de Business ---
+
 
     public void recordPayment(PaymentDetails details) {
-        // Folosim un epsilon mic pentru compararea double-urilor, e mai sigur
+
         double epsilon = 0.001;
 
         if (Math.abs(details.getAmount() - this.totalAmount) < epsilon) {
@@ -68,7 +68,7 @@ public class Invoice {
         } else if (details.getAmount() < this.totalAmount) {
             this.status = InvoiceStatus.PARTIALLY_PAID;
         }
-        // Dacă plătește mai mult, tot PAID rămâne (sau logică de creditare viitoare)
+
 
         this.paymentDetails = details;
     }

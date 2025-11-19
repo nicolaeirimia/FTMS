@@ -45,12 +45,12 @@ public class ShipmentServiceImpl implements ShipmentService {
 
         this.shipmentPrice = request.getPrice();
 
-        // Mapare DTO -> Value Objects
+
         ShipmentContactLocation pickup = mapToLocation(request.getPickupLocation());
         ShipmentContactLocation delivery = mapToLocation(request.getDeliveryLocation());
         CargoDetails cargo = mapToCargo(request.getCargoDetails());
 
-        // --- MODIFICARE AICI (Folosim Builder în loc de Constructor) ---
+
         Shipment shipment = Shipment.builder()
                 .referenceNumber(request.getReferenceNumber())
                 .customerId(request.getCustomerId())
@@ -59,7 +59,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .cargoDetails(cargo)
                 .pickupDateTime(request.getPickupDateTime())
                 .requestedDeliveryDateTime(request.getRequestedDeliveryDateTime())
-                .status(ShipmentStatus.PENDING) // Setăm explicit statusul inițial
+                .status(ShipmentStatus.PENDING)
                 .build();
         // ---------------------------------------------------------------
 
@@ -137,7 +137,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     public Shipment confirmDelivery(Long shipmentId, DeliveryConfirmationDto dto) {
         Shipment shipment = getShipmentById(shipmentId);
 
-        // --- MODIFICARE AICI (Folosim Builder) ---
+
         DeliveryConfirmation confirmation = DeliveryConfirmation.builder()
                 .shipment(shipment)
                 .actualDeliveryDateTime(dto.getActualDeliveryDateTime())
@@ -146,7 +146,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .issuesOrDamages(dto.getIssuesOrDamages())
                 .photoDocumentationUrl(dto.getPhotoDocumentationUrl())
                 .build();
-        // -----------------------------------------
+
 
         shipment.completeDelivery(confirmation);
 
@@ -167,12 +167,10 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + id));
     }
 
-    // --- Helpers ---
+
 
     private ShipmentContactLocation mapToLocation(ShipmentLocationDto dto) {
-        // Aici folosim constructorul sau builder-ul din ShipmentContactLocation.
-        // Dacă ai pus @Builder pe ShipmentContactLocation, poți folosi .builder() și aici.
-        // Dacă nu, constructorul este ok.
+
         return new ShipmentContactLocation(
                 dto.getStreet(), dto.getCity(), dto.getZipCode(), dto.getCountry(),
                 dto.getContactPerson(), dto.getContactPhone()
@@ -180,7 +178,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     private CargoDetails mapToCargo(CargoDto dto) {
-        // La fel, putem folosi Builder dacă l-am adăugat pe CargoDetails
+
         return CargoDetails.builder()
                 .description(dto.getDescription())
                 .weightKg(dto.getWeightKg())

@@ -13,8 +13,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder // <-- FOARTE UTIL pentru teste (CreateVehicleRequest -> Vehicle)
-@ToString(exclude = "maintenanceHistory") // <-- CRITIC: Rupe bucla infinită cu MaintenanceRecord
+@Builder
+@ToString(exclude = "maintenanceHistory")
 public class Vehicle {
 
     @Id
@@ -46,11 +46,11 @@ public class Vehicle {
     @Column(nullable = false)
     private VehicleStatus status;
 
-    @Builder.Default // Necesar dacă folosim @Builder, ca să nu fie null lista
+    @Builder.Default
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MaintenanceRecord> maintenanceHistory = new ArrayList<>();
 
-    // --- Logica de Business (Rămâne neschimbată - e perfectă) ---
+
 
     public boolean isAvailable() {
         return this.status == VehicleStatus.AVAILABLE &&

@@ -18,7 +18,7 @@ public class ProcessPaymentRequest {
     private double amount;
 
     @NotNull
-    private PaymentMethod paymentMethod; // Folosește enum-ul din domeniul model
+    private PaymentMethod paymentMethod;
 
     @NotEmpty
     private String referenceNumber;

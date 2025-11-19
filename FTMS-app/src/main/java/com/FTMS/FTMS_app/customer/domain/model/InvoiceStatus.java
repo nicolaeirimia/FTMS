@@ -15,10 +15,7 @@ public enum InvoiceStatus {
         this.displayName = displayName;
     }
 
-    /**
-     * Verifică dacă mai sunt bani de recuperat pe această factură.
-     * Util pentru a bloca comenzi noi (limita de credit).
-     */
+
     public boolean isOutstanding() {
         return this == PENDING || this == OVERDUE || this == PARTIALLY_PAID;
     }

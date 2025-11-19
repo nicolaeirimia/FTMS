@@ -8,11 +8,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "shipments")
 @Getter
-@Setter // <-- Util pentru teste și framework
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder // <-- Face codul din Service mult mai curat
-@ToString(exclude = "deliveryConfirmation") // <-- CRITIC: Previne bucla infinită
+@Builder
+@ToString(exclude = "deliveryConfirmation")
 public class Shipment {
 
     @Id
@@ -26,14 +26,14 @@ public class Shipment {
     @Column(nullable = false)
     private ShipmentStatus status;
 
-    // --- ID-uri de referință (Decuplare module) ---
+
     @Column(nullable = false)
     private Long customerId;
 
     private Long assignedDriverId;
     private Long assignedVehicleId;
 
-    // --- Value Objects (Mapate corect cu Override) ---
+
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "street", column = @Column(name = "pickup_street")),
@@ -59,18 +59,14 @@ public class Shipment {
     @Embedded
     private CargoDetails cargoDetails;
 
-    // --- Timpi ---
+
     private LocalDateTime pickupDateTime;
     private LocalDateTime requestedDeliveryDateTime;
 
-    // --- Entitate Copil (Relatie 1-to-1) ---
+
     @OneToOne(mappedBy = "shipment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private DeliveryConfirmation deliveryConfirmation;
 
-    // Constructorul manual poate fi șters dacă folosești @Builder,
-    // dar îl poți păstra dacă ai teste care depind de el.
-
-    // --- Logica de Business (Perfectă) ---
 
     public boolean canBeAssigned() {
         return this.status == ShipmentStatus.PENDING || this.status == ShipmentStatus.SCHEDULED;
@@ -113,7 +109,7 @@ public class Shipment {
         }
         this.deliveryConfirmation = confirmation;
 
-        // Asigură legătura bidirecțională
+
         if (confirmation.getShipment() == null) {
             confirmation.setShipment(this);
         }

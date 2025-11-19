@@ -13,9 +13,9 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder            // <-- Util pentru a crea obiectul în CustomerServiceImpl
-@ToString           // <-- Util pentru debug
-@EqualsAndHashCode  // <-- Critic pentru Value Objects
+@Builder
+@ToString
+@EqualsAndHashCode
 public class PaymentDetails {
 
     @NotNull
@@ -26,7 +26,7 @@ public class PaymentDetails {
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    private PaymentMethod paymentMethod; // Folosește enum-ul extras
+    private PaymentMethod paymentMethod;
 
     private String referenceNumber;
 }

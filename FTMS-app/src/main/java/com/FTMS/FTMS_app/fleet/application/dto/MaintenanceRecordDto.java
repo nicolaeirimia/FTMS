@@ -13,18 +13,17 @@ import java.time.LocalDate;
 public class MaintenanceRecordDto {
 
     @NotNull
-    @PastOrPresent(message = "Maintenance date cannot be in the future") // <-- ADAUGAT (presupunând că e istoric)
-    private LocalDate date;
+    @PastOrPresent(message = "Maintenance date cannot be in the future")
 
     @NotNull
     private MaintenanceType maintenanceType;
 
-    @NotEmpty(message = "Description is required") // <-- ADAUGAT
+    @NotEmpty(message = "Description is required")
     private String description;
 
     @Min(value = 0, message = "Cost cannot be negative")
     private double cost;
 
-    @NotEmpty(message = "Service provider is required") // <-- ADAUGAT
+    @NotEmpty(message = "Service provider is required")
     private String serviceProvider;
 }

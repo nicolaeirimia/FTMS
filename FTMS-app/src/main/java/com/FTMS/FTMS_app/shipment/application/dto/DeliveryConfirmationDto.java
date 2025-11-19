@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class DeliveryConfirmationDto {
 
     @NotNull(message = "Delivery time is required")
-    @PastOrPresent(message = "Delivery time cannot be in the future") // <-- Validare logică
+    @PastOrPresent(message = "Delivery time cannot be in the future")
     private LocalDateTime actualDeliveryDateTime;
 
     @NotEmpty(message = "Recipient name is required")

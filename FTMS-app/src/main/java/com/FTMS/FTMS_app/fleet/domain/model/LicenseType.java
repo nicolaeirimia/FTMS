@@ -13,14 +13,10 @@ public enum LicenseType {
         this.description = description;
     }
 
-    /**
-     * Verifică dacă acest permis îl acoperă pe cel cerut.
-     * Ex: CE.covers(C) -> true
-     * C.covers(CE) -> false
-     */
+
     public boolean covers(LicenseType required) {
         if (this == required) return true;
-        // CE este "superior" lui C
+
         return this == CE && required == C;
     }
 }

@@ -18,10 +18,7 @@ public enum PaymentTerms {
         this.displayName = displayName;
     }
 
-    /**
-     * Calculează data scadenței pe baza datei emiterii.
-     * Această metodă elimină logica if/else din Service.
-     */
+
     public LocalDate calculateDueDate(LocalDate issueDate) {
         return issueDate.plusDays(this.days);
     }

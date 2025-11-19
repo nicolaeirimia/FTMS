@@ -8,9 +8,9 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder            // <-- Util pentru teste și DTO mapping
-@ToString           // <-- Util pentru debug
-@EqualsAndHashCode  // <-- CRITIC pentru Value Objects
+@Builder
+@ToString
+@EqualsAndHashCode
 public class Address {
 
     @NotBlank(message = "Street is required")
@@ -19,7 +19,7 @@ public class Address {
     @NotBlank(message = "City is required")
     private String city;
 
-    private String state; // Poate fi opțional în unele țări
+    private String state;
 
     @NotBlank(message = "Zip code is required")
     private String zipCode;
@@ -27,9 +27,9 @@ public class Address {
     @NotBlank(message = "Country is required")
     private String country;
 
-    // Metoda de formatare îmbunătățită
+
     public String getFullAddress() {
-        // Folosim un format standard: Strada, Oraș, Județ (dacă există) Cod, Țara
+
         StringBuilder sb = new StringBuilder();
         sb.append(street).append(", ").append(city);
 

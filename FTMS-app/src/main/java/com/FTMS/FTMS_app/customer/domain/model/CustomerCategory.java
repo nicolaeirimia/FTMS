@@ -10,7 +10,7 @@ public enum CustomerCategory {
 
     private final String displayName;
     private final double discountPercentage;
-    private final int priorityLevel; // 1 = Normal, 3 = Max Priority
+    private final int priorityLevel;
 
     CustomerCategory(String displayName, double discountPercentage, int priorityLevel) {
         this.displayName = displayName;
@@ -18,9 +18,8 @@ public enum CustomerCategory {
         this.priorityLevel = priorityLevel;
     }
 
-    /**
-     * Calculează prețul final după aplicarea discount-ului specific categoriei.
-     */
+
+
     public double applyDiscount(double originalPrice) {
         return originalPrice - (originalPrice * this.discountPercentage);
     }

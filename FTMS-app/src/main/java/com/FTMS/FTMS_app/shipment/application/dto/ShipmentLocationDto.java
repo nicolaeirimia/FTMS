@@ -18,7 +18,7 @@ public class ShipmentLocationDto {
     private String city;
 
     @NotBlank(message = "Zip code is required")
-    private String zipCode; // Este critic pentru logistică
+    private String zipCode;
 
     @NotBlank(message = "Country is required")
     private String country;

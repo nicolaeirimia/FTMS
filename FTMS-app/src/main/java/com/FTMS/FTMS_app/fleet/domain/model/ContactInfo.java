@@ -10,25 +10,24 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString // <-- Util pentru loguri
-@Builder  // <-- Util pentru a crea obiecte ușor
+@ToString
+@Builder
 public class ContactInfo {
 
-    private String name; // Folosit pentru EmergencyContact
+    private String name;
 
-    // Validare: să nu fie gol și să aibă un format de telefon (simplificat)
+
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Invalid phone number")
     private String phone;
 
-    // Validare: format corect de email
+
     @Email(message = "Invalid email format")
     private String email;
 
     @NotBlank(message = "Address is required")
     private String address;
 
-    // Constructorul simplificat e ok să rămână, dar @Builder e mai flexibil
     public ContactInfo(String phone, String email, String address) {
         this.phone = phone;
         this.email = email;

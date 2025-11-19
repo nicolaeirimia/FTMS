@@ -31,10 +31,10 @@ public class CreateCustomerRequest {
     private String primaryContactEmail;
 
     @NotNull(message = "Billing address is required")
-    @Valid // Validează recursiv interiorul obiectului
+    @Valid
     private AddressDto billingAddress;
 
-    @Valid // Validează fiecare adresă din listă
+    @Valid
     private List<AddressDto> deliveryAddresses;
 
     @NotNull(message = "Payment terms are required")

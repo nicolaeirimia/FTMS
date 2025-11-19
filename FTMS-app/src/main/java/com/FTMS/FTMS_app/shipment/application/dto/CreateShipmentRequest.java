@@ -19,7 +19,7 @@ public class CreateShipmentRequest {
     private Long customerId;
 
     @NotNull(message = "Pickup location is required")
-    @Valid // Validează interiorul obiectului ShipmentLocationDto
+    @Valid
     private ShipmentLocationDto pickupLocation;
 
     @NotNull(message = "Delivery location is required")

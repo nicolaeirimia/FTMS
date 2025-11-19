@@ -19,17 +19,12 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
 
     List<Shipment> findByCustomerId(Long customerId);
 
-    // Metode derivate complexe (Spring generează SQL-ul automat)
+
     Optional<Shipment> findByAssignedDriverIdAndStatusIn(Long driverId, List<ShipmentStatus> statuses);
 
     Optional<Shipment> findByAssignedVehicleIdAndStatusIn(Long vehicleId, List<ShipmentStatus> statuses);
 
-    // --- CERINȚA PENTRU SPRINT: Custom Query cu @Query ---
 
-    /**
-     * Găsește cursele cu marfă grea (peste o anumită greutate).
-     * Demonstrează navigarea în obiectul embedded (cargoDetails.weightKg).
-     */
     @Query("SELECT s FROM Shipment s WHERE s.cargoDetails.weightKg > :minWeight")
     List<Shipment> findHeavyShipments(@Param("minWeight") double minWeight);
 }

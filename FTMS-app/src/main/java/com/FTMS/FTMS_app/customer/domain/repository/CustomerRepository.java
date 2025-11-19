@@ -14,8 +14,7 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-    // --- 1. Metode Standard (Derived Queries) ---
-    // Esențiale pentru validări (unicitate)
+
     Optional<Customer> findByTaxIdNumber(String taxIdNumber);
 
     Optional<Customer> findByPrimaryContactEmail(String email);
@@ -23,24 +22,14 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Optional<Customer> findByRegistrationNumber(String regNumber);
 
 
-    // --- 2. CUSTOM QUERIES (Logică de Business) ---
 
-    /**
-     * Scenario: "Search Bar" pentru agenții de vânzări.
-     * Caută clienți după o parte din nume (case-insensitive), dar doar pe cei activi.
-     * * SQL Echivalent: SELECT * FROM customers WHERE lower(company_name) LIKE '%text%' AND status = 'ACTIVE'
-     */
     @Query("SELECT c FROM Customer c " +
             "WHERE LOWER(c.companyName) LIKE LOWER(CONCAT('%', :nameFragment, '%')) " +
             "AND c.status = 'ACTIVE'")
     List<Customer> searchActiveCustomersByName(@Param("nameFragment") String nameFragment);
 
 
-    /**
-     * Scenario: Analiză Regională / Marketing.
-     * Găsește toți clienții VIP dintr-un anumit oraș.
-     * Demonstrează: Navigarea în obiectul @Embedded (billingAddress.city).
-     */
+
     @Query("SELECT c FROM Customer c " +
             "WHERE c.billingAddress.city = :city " +
             "AND c.category = :category")
@@ -50,11 +39,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     );
 
 
-    /**
-     * Scenario: Risk Management.
-     * Găsește clienții "riscanți": Au status SUSPENDED dar au o limită de credit mare.
-     * (Poate vrei să le reduci limita automat).
-     */
+
     @Query("SELECT c FROM Customer c " +
             "WHERE c.status = :status " +
             "AND c.creditLimit > :threshold")

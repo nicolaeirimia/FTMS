@@ -12,7 +12,7 @@ public class CreateDriverRequest {
     @NotEmpty(message = "Name is required")
     private String name;
 
-    // --- License Info ---
+
     @NotEmpty(message = "License number is required")
     private String licenseNumber;
 
@@ -20,26 +20,26 @@ public class CreateDriverRequest {
     private LicenseType licenseType;
 
     @NotNull
-    @PastOrPresent(message = "Issue date cannot be in the future") // <-- ADAUGAT
+    @PastOrPresent(message = "Issue date cannot be in the future")
     private LocalDate licenseIssueDate;
 
     @NotNull
     @Future(message = "License expiry date must be in the future")
     private LocalDate licenseExpiryDate;
 
-    // --- Contact Details ---
+
     @NotEmpty(message = "Phone number is required")
-    @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Invalid phone format") // <-- ADAUGAT (opțional)
+    @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Invalid phone format")
     private String phone;
 
-    @NotEmpty(message = "Email is required") // <-- ADAUGAT (dacă e obligatoriu)
+    @NotEmpty(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotEmpty(message = "Address is required") // <-- ADAUGAT (dacă e obligatoriu)
+    @NotEmpty(message = "Address is required")
     private String address;
 
-    // --- Emergency Contact (Presupunem că sunt opționale, deci le lăsăm așa) ---
+
     private String emergencyContactName;
     private String emergencyContactPhone;
 

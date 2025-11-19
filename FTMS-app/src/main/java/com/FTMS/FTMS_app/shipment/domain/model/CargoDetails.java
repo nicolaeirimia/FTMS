@@ -9,9 +9,9 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder            // <-- Util pentru a construi obiectul clar
-@ToString           // <-- Util pentru debug
-@EqualsAndHashCode  // <-- CRITIC pentru Value Objects (compară valorile, nu referința)
+@Builder
+@ToString
+@EqualsAndHashCode
 public class CargoDetails {
 
     @NotBlank(message = "Description is required")
@@ -23,6 +23,6 @@ public class CargoDetails {
     @Min(value = 0, message = "Volume cannot be negative")
     private double volumeCubicMeters;
 
-    private String specialHandlingRequirements; // Poate fi null/gol
-    private String additionalNotes;             // Poate fi null/gol
+    private String specialHandlingRequirements;
+    private String additionalNotes;
 }

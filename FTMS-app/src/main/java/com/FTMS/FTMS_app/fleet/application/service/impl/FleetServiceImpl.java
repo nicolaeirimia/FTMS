@@ -27,14 +27,13 @@ public class FleetServiceImpl implements FleetService {
 
     @Override
     public Vehicle addVehicle(CreateVehicleRequest request) {
-        // 1. Validare Unicitate
+
         vehicleRepository.findByRegistrationNumber(request.getRegistrationNumber())
                 .ifPresent(v -> {
                     throw new IllegalArgumentException("Vehicle with registration number " + request.getRegistrationNumber() + " already exists.");
                 });
 
-        // 2. Mapare (Folosind Builder pentru claritate)
-        // Dacă nu ai pus @Builder pe VehicleCapacity, folosește constructorul: new VehicleCapacity(...)
+
         VehicleCapacity capacity = new VehicleCapacity(request.getMaxWeightKg(), request.getMaxVolumeCubicMeters());
 
         Vehicle vehicle = Vehicle.builder()
@@ -57,14 +56,13 @@ public class FleetServiceImpl implements FleetService {
 
     @Override
     public Driver addDriver(CreateDriverRequest request) {
-        // 1. Validare
+
         driverRepository.findByLicenseInfoLicenseNumber(request.getLicenseNumber())
                 .ifPresent(d -> {
                     throw new IllegalArgumentException("Driver with license number " + request.getLicenseNumber() + " already exists.");
                 });
 
-        // 2. Mapare Value Objects (Folosind Builder sau Constructor)
-        // Presupunem că ai pus @Builder pe ele. Dacă nu, folosește new LicenseInfo(...)
+
         LicenseInfo license = LicenseInfo.builder()
                 .licenseNumber(request.getLicenseNumber())
                 .licenseType(request.getLicenseType())
@@ -83,7 +81,7 @@ public class FleetServiceImpl implements FleetService {
                 .phone(request.getEmergencyContactPhone())
                 .build();
 
-        // 3. Mapare Driver
+
         Driver driver = Driver.builder()
                 .name(request.getName())
                 .licenseInfo(license)
@@ -109,7 +107,7 @@ public class FleetServiceImpl implements FleetService {
     public void completeMaintenance(Long vehicleId, MaintenanceRecordDto recordDto) {
         Vehicle vehicle = getVehicleById(vehicleId);
 
-        // Mapare folosind Builder
+
         MaintenanceRecord record = MaintenanceRecord.builder()
                 .date(recordDto.getDate())
                 .maintenanceType(recordDto.getMaintenanceType())
@@ -118,7 +116,7 @@ public class FleetServiceImpl implements FleetService {
                 .serviceProvider(recordDto.getServiceProvider())
                 .build();
 
-        vehicle.completeMaintenance(record); // Business Logic (leagă și relația)
+        vehicle.completeMaintenance(record);
 
         vehicleRepository.save(vehicle);
     }
@@ -138,7 +136,7 @@ public class FleetServiceImpl implements FleetService {
         driverRepository.save(driver);
     }
 
-    // --- Metode Utilitare (Helpers) ---
+
 
     @Override
     @Transactional(readOnly = true)
@@ -167,7 +165,7 @@ public class FleetServiceImpl implements FleetService {
         return vehicleRepository.findByStatus(VehicleStatus.AVAILABLE);
     }
 
-    // --- Metode de Workflow (apelate de ShipmentService) ---
+
 
     @Override
     @Transactional

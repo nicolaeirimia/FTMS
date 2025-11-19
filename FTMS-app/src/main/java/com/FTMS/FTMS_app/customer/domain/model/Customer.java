@@ -14,8 +14,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder // <-- Foarte util pentru teste
-@ToString(exclude = "contract") // <-- CRITIC: Rupe bucla infinită
+@Builder
+@ToString(exclude = "contract")
 public class Customer {
 
     @Id
@@ -28,12 +28,12 @@ public class Customer {
 
     @NotBlank(message = "Tax ID is required")
     @Column(unique = true, nullable = false)
-    private String taxIdNumber; // CUI
+    private String taxIdNumber;
 
     @Column(unique = true)
-    private String registrationNumber; // Nr. Reg. Com.
+    private String registrationNumber;
 
-    // Contact Info Simplificat (E OK să fie plat aici)
+
     @NotBlank
     private String primaryContactName;
 
@@ -44,7 +44,7 @@ public class Customer {
     @Column(unique = true)
     private String primaryContactEmail;
 
-    @Embedded // Adresa de facturare
+    @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "street", column = @Column(name = "billing_street")),
             @AttributeOverride(name = "city", column = @Column(name = "billing_city")),
@@ -54,8 +54,8 @@ public class Customer {
     })
     private Address billingAddress;
 
-    @Builder.Default // <-- CRITIC: Asigură că lista nu e null când folosim Builder
-    @ElementCollection // Hibernate creează tabelul 'customer_delivery_addresses'
+    @Builder.Default
+    @ElementCollection
     @CollectionTable(
             name = "customer_delivery_addresses",
             joinColumns = @JoinColumn(name = "customer_id")
@@ -76,7 +76,7 @@ public class Customer {
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Contract contract;
 
-    // --- Logica de Business ---
+
 
     public boolean canPlaceNewShipment() {
         return this.status == CustomerStatus.ACTIVE;
@@ -99,7 +99,7 @@ public class Customer {
         this.deliveryAddresses.add(address);
     }
 
-    // Helper pentru a seta contractul și a menține relația bidirecțională
+
     public void setContract(Contract contract) {
         this.contract = contract;
         if (contract != null && contract.getCustomer() != this) {

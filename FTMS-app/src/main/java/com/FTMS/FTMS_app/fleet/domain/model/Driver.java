@@ -11,15 +11,15 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder // <-- Util pentru teste
-@ToString(exclude = "primaryVehicle") // <-- Evită bucle infinite dacă Vehicle are referință înapoi la Driver
+@Builder
+@ToString(exclude = "primaryVehicle")
 public class Driver {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false) // Validare DB: Numele e obligatoriu
+    @Column(nullable = false)
     private String name;
 
     @Embedded
@@ -48,28 +48,28 @@ public class Driver {
     @Enumerated(EnumType.STRING)
     private DriverStatus status;
 
-    @OneToOne(fetch = FetchType.LAZY) // Performanță: Nu încărca vehiculul dacă nu e nevoie
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "primary_vehicle_id")
     private Vehicle primaryVehicle;
 
-    // --- Logica de Business Îmbunătățită (Null Safety) ---
+
 
     public boolean isAvailable() {
-        // Verificăm dacă licenseInfo există înainte să apelăm metode pe el
+
         return this.status == DriverStatus.AVAILABLE
                 && licenseInfo != null
                 && licenseInfo.isValid();
     }
 
     public boolean canDriveVehicle(Vehicle vehicle) {
-        if (vehicle == null || licenseInfo == null) return false; // Safety check
+        if (vehicle == null || licenseInfo == null) return false;
 
         return licenseInfo.getLicenseType() == LicenseType.CE ||
                 (licenseInfo.getLicenseType() == LicenseType.C &&
                         (vehicle.getVehicleType() != VehicleType.TANKER && vehicle.getVehicleType() != VehicleType.FLATBED));
     }
 
-    // Restul metodelor rămân la fel
+
     public void assignToShipment() {
         if (!isAvailable()) {
             throw new IllegalStateException("Driver " + name + " is not available for assignment.");

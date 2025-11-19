@@ -8,9 +8,9 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder            // Util pentru teste și mapping
-@ToString           // Util pentru debug
-@EqualsAndHashCode  // Critic pentru Value Objects
+@Builder
+@ToString
+@EqualsAndHashCode
 public class ShipmentContactLocation {
 
     @NotBlank(message = "Street is required")
@@ -31,9 +31,7 @@ public class ShipmentContactLocation {
     @NotBlank(message = "Contact phone is required")
     private String contactPhone;
 
-    /**
-     * Formatează adresa completă pentru afișare în UI sau pe factură.
-     */
+
     public String getFullAddress() {
         return String.format("%s, %s, %s, %s (Contact: %s, %s)",
                 street, city, zipCode, country, contactPerson, contactPhone);

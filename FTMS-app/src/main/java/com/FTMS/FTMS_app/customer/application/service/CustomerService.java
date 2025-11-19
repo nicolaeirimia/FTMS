@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface CustomerService {
 
-    // --- Management Clienți ---
+
     Customer createCustomer(CreateCustomerRequest request);
 
 
@@ -19,19 +19,17 @@ public interface CustomerService {
 
     Customer getCustomerById(Long id);
 
-    // --- Management Contracte ---
+
     Contract addContractToCustomer(CreateContractRequest request);
 
-    // --- Management Financiar ---
+
     Invoice generateInvoice(Long customerId, Long shipmentId, double amount);
 
     Invoice processPayment(Long invoiceId, ProcessPaymentRequest request);
 
-    /**
-     * Returnează istoricul facturilor pentru un client.
-     */
+
     List<Invoice> getInvoicesForCustomer(Long customerId);
 
-    // --- Reguli de Business / Audit ---
+
     void checkCustomerOverdueStatus(Long customerId);
 }

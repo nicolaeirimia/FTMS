@@ -23,7 +23,7 @@ public class CreateContractRequest {
     private LocalDate endDate;
 
     @NotNull(message = "Service level is required")
-    private ServiceLevel serviceLevel; // <-- Folosim Enum direct!
+    private ServiceLevel serviceLevel;
 
     @Min(value = 0, message = "Discount rate cannot be negative")
     @Max(value = 1, message = "Discount rate cannot correspond to more than 100%")

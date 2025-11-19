@@ -18,11 +18,11 @@ public class AddressDto {
     @NotBlank(message = "City is required")
     private String city;
 
-    private String state; // Rămâne opțional (multe țări nu folosesc state/județe la adrese)
+    private String state;
 
     @NotBlank(message = "Zip code is required")
     private String zipCode;
 
-    @NotBlank(message = "Country is required") // <-- CRITIC: Acum este obligatoriu
+    @NotBlank(message = "Country is required")
     private String country;
 }

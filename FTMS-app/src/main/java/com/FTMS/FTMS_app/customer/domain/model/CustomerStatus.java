@@ -14,9 +14,7 @@ public enum CustomerStatus {
         this.displayName = displayName;
     }
 
-    /**
-     * Verifică dacă clientul are dreptul să plaseze comenzi noi.
-     */
+
     public boolean canPlaceOrders() {
         return this == ACTIVE;
     }

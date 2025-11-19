@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "shipment") // <-- CRITIC: Rupe bucla infinită cu Shipment
+@ToString(exclude = "shipment")
 public class DeliveryConfirmation {
 
     @Id
@@ -20,19 +20,18 @@ public class DeliveryConfirmation {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shipment_id", nullable = false) // Cheia străină este aici
+    @JoinColumn(name = "shipment_id", nullable = false)
     private Shipment shipment;
 
     private LocalDateTime actualDeliveryDateTime;
 
     private String recipientName;
 
-    private String recipientSignature; // URL sau Base64 string
+    private String recipientSignature;
 
-    private String issuesOrDamages; // Null dacă totul e ok
+    private String issuesOrDamages;
 
-    private String photoDocumentationUrl; // URL către cloud storage (S3/MinIO)
+    private String photoDocumentationUrl;
 
-    // Constructorul manual nu mai este necesar dacă ai @Builder,
-    // dar îl poți păstra dacă îți place.
+
 }

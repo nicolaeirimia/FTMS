@@ -11,9 +11,9 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString           // Util pentru debug (vezi datele licenței în loguri)
-@EqualsAndHashCode  // Esențial pentru Value Objects
-@Builder            // Opțional, dar ajută la teste
+@ToString
+@EqualsAndHashCode
+@Builder
 public class LicenseInfo {
 
     private String licenseNumber;
@@ -24,14 +24,11 @@ public class LicenseInfo {
     private LocalDate issueDate;
     private LocalDate expiryDate;
 
-    /**
-     * Verifică dacă licența este validă.
-     * Returnează false dacă data de expirare lipsește.
-     */
+
     public boolean isValid() {
         if (expiryDate == null) {
-            return false; // Sau true, depinde de regula ta de business (dar evită NPE)
+            return false;
         }
-        return LocalDate.now().isBefore(expiryDate); // Sau !isAfter() dacă vrei să incluzi și ziua de azi
+        return LocalDate.now().isBefore(expiryDate);
     }
 }
