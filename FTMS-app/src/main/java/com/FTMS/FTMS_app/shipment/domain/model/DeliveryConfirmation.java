@@ -1,5 +1,6 @@
 package com.FTMS.FTMS_app.shipment.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference; // <-- IMPORT NOU
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class DeliveryConfirmation {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipment_id", nullable = false)
+    @JsonBackReference
     private Shipment shipment;
 
     private LocalDateTime actualDeliveryDateTime;
@@ -32,6 +34,4 @@ public class DeliveryConfirmation {
     private String issuesOrDamages;
 
     private String photoDocumentationUrl;
-
-
 }

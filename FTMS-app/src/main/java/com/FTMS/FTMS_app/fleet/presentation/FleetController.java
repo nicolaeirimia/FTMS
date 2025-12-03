@@ -13,70 +13,71 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController // Marchează clasa ca un controler REST
-@RequestMapping("/api/v1/fleet") // Toate rutele din acest controler vor începe cu /api/v1/fleet
+@RestController // Spune Spring-ului că această clasă gestionează cereri HTTP
+@RequestMapping("/api/v1/fleet") // Prefixul comun pentru toate rutele
 public class FleetController {
 
     private final FleetService fleetService;
 
-    // Injectăm serviciul
     public FleetController(FleetService fleetService) {
         this.fleetService = fleetService;
     }
 
-    // --- Vehicule ---
+    // --- VEHICLES ---
 
-    @PostMapping("/vehicles") // POST /api/v1/fleet/vehicles
+    @PostMapping("/vehicles")
     public ResponseEntity<Vehicle> addVehicle(@Valid @RequestBody CreateVehicleRequest request) {
-        // @Valid -> Activează validările din DTO (ex: @NotEmpty)
-        // @RequestBody -> Convertește JSON-ul din cerere în obiectul DTO
+        // @Valid -> Activează validările din DTO (@NotEmpty, @Min etc.)
         Vehicle newVehicle = fleetService.addVehicle(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newVehicle);
+        return new ResponseEntity<>(newVehicle, HttpStatus.CREATED);
     }
 
-    @GetMapping("/vehicles/{id}") // GET /api/v1/fleet/vehicles/1
+    @GetMapping("/vehicles/{id}")
     public ResponseEntity<Vehicle> getVehicleById(@PathVariable Long id) {
-        // @PathVariable -> Ia "id" din URL
         return ResponseEntity.ok(fleetService.getVehicleById(id));
     }
 
-    @GetMapping("/vehicles/available") // GET /api/v1/fleet/vehicles/available
+    @GetMapping("/vehicles/available")
     public ResponseEntity<List<Vehicle>> getAvailableVehicles() {
         return ResponseEntity.ok(fleetService.findAvailableVehicles());
     }
 
-    @PutMapping("/vehicles/{id}/maintenance/schedule") // PUT /api/v1/fleet/vehicles/1/maintenance/schedule
-    public ResponseEntity<Void> scheduleMaintenance(@PathVariable Long id) {
-        fleetService.scheduleMaintenance(id);
-        return ResponseEntity.ok().build(); // Răspuns 200 OK fără corp
-    }
-
-    @PostMapping("/vehicles/{id}/maintenance/complete") // POST /api/v1/fleet/vehicles/1/maintenance/complete
-    public ResponseEntity<Void> completeMaintenance(@PathVariable Long id, @Valid @RequestBody MaintenanceRecordDto recordDto) {
+    @PostMapping("/vehicles/{id}/maintenance")
+    public ResponseEntity<Void> completeMaintenance(
+            @PathVariable Long id,
+            @Valid @RequestBody MaintenanceRecordDto recordDto) {
         fleetService.completeMaintenance(id, recordDto);
         return ResponseEntity.ok().build();
     }
 
-    // --- Șoferi ---
-
-    @PostMapping("/drivers") // POST /api/v1/fleet/drivers
-    public ResponseEntity<Driver> addDriver(@Valid @RequestBody CreateDriverRequest request) {
-        Driver newDriver = fleetService.addDriver(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newDriver);
+    @PutMapping("/vehicles/{id}/schedule-maintenance")
+    public ResponseEntity<Void> scheduleMaintenance(@PathVariable Long id) {
+        fleetService.scheduleMaintenance(id);
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/drivers/{id}") // GET /api/v1/fleet/drivers/1
+    // --- DRIVERS ---
+
+    @PostMapping("/drivers")
+    public ResponseEntity<Driver> addDriver(@Valid @RequestBody CreateDriverRequest request) {
+        Driver newDriver = fleetService.addDriver(request);
+        return new ResponseEntity<>(newDriver, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/drivers/{id}")
     public ResponseEntity<Driver> getDriverById(@PathVariable Long id) {
         return ResponseEntity.ok(fleetService.getDriverById(id));
     }
 
-    @GetMapping("/drivers/available") // GET /api/v1/fleet/drivers/available
+    @GetMapping("/drivers/available")
     public ResponseEntity<List<Driver>> getAvailableDrivers() {
         return ResponseEntity.ok(fleetService.findAvailableDrivers());
     }
 
-    @PutMapping("/drivers/{driverId}/assign-vehicle/{vehicleId}") // PUT /api/v1/fleet/drivers/1/assign-vehicle/1
-    public ResponseEntity<Void> assignPrimaryVehicle(@PathVariable Long driverId, @PathVariable Long vehicleId) {
+    @PutMapping("/drivers/{driverId}/assign-vehicle/{vehicleId}")
+    public ResponseEntity<Void> assignPrimaryVehicle(
+            @PathVariable Long driverId,
+            @PathVariable Long vehicleId) {
         fleetService.assignPrimaryVehicle(driverId, vehicleId);
         return ResponseEntity.ok().build();
     }

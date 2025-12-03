@@ -7,7 +7,8 @@ import org.junit.platform.suite.api.Suite;
 @SelectClasses({
         Test1_EntityRepository.class,
         Test2_ComputingServices.class,
-        Test3_WorkflowServices.class
+        Test3_WorkflowServices.class,
+        Test4_RestApiIntegration.class
 })
 public class AllTestsSuite {
 }

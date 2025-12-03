@@ -1,7 +1,8 @@
 package com.FTMS.FTMS_app.shipment.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference; // <-- IMPORT NOU
 import jakarta.persistence.*;
-import lombok.*; // Builder, ToString, Setter
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -26,14 +27,14 @@ public class Shipment {
     @Column(nullable = false)
     private ShipmentStatus status;
 
-
+    // --- ID-uri de referință (Loose Coupling) ---
     @Column(nullable = false)
     private Long customerId;
 
     private Long assignedDriverId;
     private Long assignedVehicleId;
 
-
+    // --- Value Objects ---
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "street", column = @Column(name = "pickup_street")),
@@ -59,14 +60,15 @@ public class Shipment {
     @Embedded
     private CargoDetails cargoDetails;
 
-
     private LocalDateTime pickupDateTime;
     private LocalDateTime requestedDeliveryDateTime;
 
-
+    // --- Relația Bidirecțională ---
     @OneToOne(mappedBy = "shipment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference // <-- CRITIC: Permite serializarea confirmării, dar gestionează bucla
     private DeliveryConfirmation deliveryConfirmation;
 
+    // --- Logica de Business ---
 
     public boolean canBeAssigned() {
         return this.status == ShipmentStatus.PENDING || this.status == ShipmentStatus.SCHEDULED;
@@ -100,7 +102,6 @@ public class Shipment {
             throw new IllegalStateException("Cannot cancel a delivered shipment.");
         }
         this.status = ShipmentStatus.CANCELED;
-        // Resursele se eliberează în Service, nu aici (corect)
     }
 
     public void completeDelivery(DeliveryConfirmation confirmation) {
@@ -108,7 +109,6 @@ public class Shipment {
             throw new IllegalStateException("Shipment must be IN_TRANSIT to be delivered.");
         }
         this.deliveryConfirmation = confirmation;
-
 
         if (confirmation.getShipment() == null) {
             confirmation.setShipment(this);

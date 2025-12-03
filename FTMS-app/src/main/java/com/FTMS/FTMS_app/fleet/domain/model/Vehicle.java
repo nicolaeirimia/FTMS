@@ -2,7 +2,7 @@ package com.FTMS.FTMS_app.fleet.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*; // Builder, ToString
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +48,7 @@ public class Vehicle {
 
     @Builder.Default
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<MaintenanceRecord> maintenanceHistory = new ArrayList<>();
 
 

@@ -36,27 +36,31 @@ public class ShipmentController {
             @PathVariable Long id,
             @RequestParam Long driverId,
             @RequestParam Long vehicleId) {
-        // Folosim @RequestParam pentru date simple (ex: /assign?driverId=1&vehicleId=2)
+        // Exemplu apel: PUT /api/v1/shipments/1/assign?driverId=5&vehicleId=10
         Shipment assignedShipment = shipmentService.assignShipment(id, driverId, vehicleId);
         return ResponseEntity.ok(assignedShipment);
     }
 
+    // --- MODIFICAT AICI: Returnăm Shipment în loc de Void ---
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancelShipment(@PathVariable Long id) {
-        shipmentService.cancelShipment(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Shipment> cancelShipment(@PathVariable Long id) {
+        Shipment canceledShipment = shipmentService.cancelShipment(id);
+        return ResponseEntity.ok(canceledShipment);
     }
+    // --------------------------------------------------------
 
     @PutMapping("/{id}/status/{newStatus}")
     public ResponseEntity<Shipment> updateShipmentStatus(
             @PathVariable Long id,
             @PathVariable ShipmentStatus newStatus) {
-        // ATENȚIE: Acceptăm doar anumite statusuri
+
+        // Validăm că nu se încearcă setarea directă a statusurilor finale prin acest endpoint
         if (newStatus == ShipmentStatus.PICKED_UP || newStatus == ShipmentStatus.IN_TRANSIT) {
             Shipment updatedShipment = shipmentService.updateShipmentStatus(id, newStatus);
             return ResponseEntity.ok(updatedShipment);
         } else {
-            return ResponseEntity.badRequest().build(); // Nu permitem setarea "DELIVERED" prin acest endpoint
+            // Returnăm 400 Bad Request dacă încearcă să seteze DELIVERED manual
+            return ResponseEntity.badRequest().build();
         }
     }
 

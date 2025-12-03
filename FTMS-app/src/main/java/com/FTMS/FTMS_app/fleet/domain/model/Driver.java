@@ -1,7 +1,8 @@
 package com.FTMS.FTMS_app.fleet.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // <-- IMPORT NOU
 import jakarta.persistence.*;
-import lombok.*; // Am adăugat Builder și ToString
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -50,12 +51,13 @@ public class Driver {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "primary_vehicle_id")
+    // Această adnotare previne erorile când Jackson încearcă să serializeze un obiect Lazy
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Vehicle primaryVehicle;
 
-
+    // --- Logica de Business ---
 
     public boolean isAvailable() {
-
         return this.status == DriverStatus.AVAILABLE
                 && licenseInfo != null
                 && licenseInfo.isValid();
@@ -68,7 +70,6 @@ public class Driver {
                 (licenseInfo.getLicenseType() == LicenseType.C &&
                         (vehicle.getVehicleType() != VehicleType.TANKER && vehicle.getVehicleType() != VehicleType.FLATBED));
     }
-
 
     public void assignToShipment() {
         if (!isAvailable()) {

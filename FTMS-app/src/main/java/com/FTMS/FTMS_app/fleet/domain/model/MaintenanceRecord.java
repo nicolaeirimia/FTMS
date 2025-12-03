@@ -2,8 +2,9 @@ package com.FTMS.FTMS_app.fleet.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*; // Am adăugat ToString
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import java.math.BigDecimal; // Recomandat pentru bani
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -22,6 +23,7 @@ public class MaintenanceRecord {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", nullable = false)
+    @JsonBackReference
     private Vehicle vehicle;
 
     private LocalDate date;

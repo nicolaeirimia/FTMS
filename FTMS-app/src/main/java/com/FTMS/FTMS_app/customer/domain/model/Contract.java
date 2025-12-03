@@ -2,6 +2,7 @@ package com.FTMS.FTMS_app.customer.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.time.LocalDate;
 
@@ -21,6 +22,7 @@ public class Contract {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
+    @JsonBackReference
     private Customer customer;
 
     @Column(nullable = false)

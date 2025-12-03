@@ -1,21 +1,180 @@
-### Creare Vehicul Nou
+### ==========================================
+### 1. MODULUL FLEET (Gestiunea Resurselor)
+### ==========================================
+
+### 1.1. Adaugă un Vehicul (Camion)
 POST http://localhost:8080/api/v1/fleet/vehicles
 Content-Type: application/json
 
 {
-  "registrationNumber": "B-101-ABC",
+  "registration_number": "IF-22-DEMO",
   "make": "Volvo",
   "model": "FH16",
-  "vehicleType": "BOX_TRUCK",
-  "yearOfManufacture": 2022,
-  "maxWeightKg": 25000,
-  "maxVolumeCubicMeters": 85,
-  "fuelType": "Diesel",
-  "currentMileage": 50000,
-  "insurancePolicyNumber": "INS-987654",
-  "insuranceExpiryDate": "2026-10-01",
-  "registrationExpiryDate": "2026-05-01"
+  "vehicle_type": "BOX_TRUCK",
+  "year_of_manufacture": 2023,
+  "max_weight_kg": 24000,
+  "max_volume_m3": 90,
+  "fuel_type": "Diesel",
+  "current_mileage": 15000,
+  "insurance_policy_number": "INS-2024-001",
+  "insurance_expiry_date": "2025-12-31",
+  "registration_expiry_date": "2025-12-31"
 }
 
+### 1.2. Adaugă un Șofer
+POST http://localhost:8080/api/v1/fleet/drivers
+Content-Type: application/json
 
-###
+{
+  "full_name": "Ion Popescu",
+  "license_number": "L-12345678",
+  "license_type": "CE",
+  "license_issue_date": "2020-01-01",
+  "license_expiry_date": "2030-01-01",
+  "phone_number": "0722123456",
+  "email": "ion.popescu@transport.ro",
+  "address": "Str. Soferilor nr. 1, Bucuresti",
+  "emergency_contact_name": "Maria Popescu",
+  "emergency_contact_phone": "0733654321",
+  "employment_date": "2022-05-01"
+}
+
+### 1.3. Verifică Vehiculele Disponibile
+GET http://localhost:8080/api/v1/fleet/vehicles/available
+
+### ==========================================
+### 2. MODULUL CUSTOMER (Clienți & Contracte)
+### ==========================================
+
+### 2.1. Creează un Client Nou
+POST http://localhost:8080/api/v1/customers
+Content-Type: application/json
+
+{
+  "company_name": "Mega Retailer SRL",
+  "tax_id_number": "RO123456789",
+  "registration_number": "J40/123/2020",
+  "primary_contact_name": "Andrei Manager",
+  "primary_contact_phone": "0744999888",
+  "primary_contact_email": "contact@megaretailer.ro",
+  "billing_address": {
+    "street": "Bd. Unirii nr. 10",
+    "city": "Bucuresti",
+    "zip_code": "030000",
+    "country": "Romania"
+  },
+  "delivery_addresses": [
+    {
+      "street": "Sos. Chitilei nr. 50",
+      "city": "Bucuresti",
+      "zip_code": "010000",
+      "country": "Romania"
+    }
+  ],
+  "payment_terms": "NET_30",
+  "category": "VIP",
+  "credit_limit": 100000.0
+}
+
+### 2.2. Adaugă un Contract (Pentru Discount)
+POST http://localhost:8080/api/v1/customers/contracts
+Content-Type: application/json
+
+{
+  "customer_id": 1,
+  "start_date": "2024-01-01",
+  "end_date": "2025-12-31",
+  "service_level": "EXPRESS",
+  "discount_rate": 0.15
+}
+
+### ==========================================
+### 3. MODULUL SHIPMENT (Fluxul Principal)
+### ==========================================
+
+### 3.1. Creează o Cursă (Status: PENDING)
+POST http://localhost:8080/api/v1/shipments
+Content-Type: application/json
+
+{
+  "reference_number": "CMD-2024-001",
+  "customer_id": 1,
+  "pickup_location": {
+    "street": "Depozit Central",
+    "city": "Bucuresti",
+    "zip_code": "030000",
+    "country": "Romania",
+    "contact_person": "Magazioner Sef",
+    "contact_phone": "0700111222"
+  },
+  "delivery_location": {
+    "street": "Magazin Brasov",
+    "city": "Brasov",
+    "zip_code": "500000",
+    "country": "Romania",
+    "contact_person": "Director Magazin",
+    "contact_phone": "0700333444"
+  },
+  "cargo_details": {
+    "description": "Paleti Apa Minerala",
+    "weight_kg": 22000,
+    "volume_m3": 80,
+    "special_handling_requirements": "Fragil",
+    "additional_notes": "Livrare la rampa 2"
+  },
+  "pickup_date_time": "2025-06-01T08:00:00",
+  "requested_delivery_date_time": "2025-06-01T18:00:00",
+  "price": 2000.0
+}
+
+### 3.2. Alocă Resursele (Status -> SCHEDULED)
+# NOTĂ: Dacă rulezi pe o bază curată, ID-urile vor fi 1.
+PUT http://localhost:8080/api/v1/shipments/1/assign?driverId=1&vehicleId=1
+
+### 3.3. Simulează Transportul (Status -> PICKED_UP)
+PUT http://localhost:8080/api/v1/shipments/1/status/PICKED_UP
+
+### 3.4. Simulează Transportul (Status -> IN_TRANSIT)
+PUT http://localhost:8080/api/v1/shipments/1/status/IN_TRANSIT
+
+### 3.5. Confirmă Livrarea (Status -> DELIVERED & Generare Factură)
+POST http://localhost:8080/api/v1/shipments/1/confirm-delivery
+Content-Type: application/json
+
+{
+  "actual_delivery_date_time": "2025-06-01T17:30:00",
+  "recipient_name": "Director Magazin Brasov",
+  "recipient_signature": "Semnatura Digitala",
+  "issues_or_damages": "Niciuna",
+  "photo_documentation_url": "http://cloud/delivery/img1.jpg"
+}
+
+### ==========================================
+### 4. VERIFICARE FINANCIARĂ & MENTENANȚĂ
+### ==========================================
+
+### 4.1. Vezi Facturile Clientului (Ar trebui să fie una nouă)
+GET http://localhost:8080/api/v1/customers/1/invoices
+
+### 4.2. Plătește Factura (Status -> PAID)
+POST http://localhost:8080/api/v1/customers/invoices/1/pay
+Content-Type: application/json
+
+{
+  "payment_date": "2025-06-02",
+  "amount": 2040.0,
+  "payment_method": "BANK_TRANSFER",
+  "reference_number": "OP-555999"
+}
+
+### 4.3. Înregistrează o Mentenanță la Vehicul
+POST http://localhost:8080/api/v1/fleet/vehicles/1/maintenance
+Content-Type: application/json
+
+{
+  "date": "2024-05-01",
+  "maintenance_type": "ROUTINE_SERVICE",
+  "description": "Schimb ulei si filtre",
+  "cost": 500.0,
+  "service_provider": "Service Camioane SRL"
+}

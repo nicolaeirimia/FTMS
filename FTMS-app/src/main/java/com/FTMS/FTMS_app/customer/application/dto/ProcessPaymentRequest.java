@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 
@@ -18,8 +19,10 @@ public class ProcessPaymentRequest {
     private double amount;
 
     @NotNull
+    @JsonProperty("payment_Method")
     private PaymentMethod paymentMethod;
 
     @NotEmpty
+    @JsonProperty("referenceNumber")
     private String referenceNumber;
 }
