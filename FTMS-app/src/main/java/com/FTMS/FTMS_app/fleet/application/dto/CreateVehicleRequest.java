@@ -15,7 +15,6 @@ public class CreateVehicleRequest {
     private String registrationNumber;
 
     @NotEmpty(message = "Make is required")
-    // Nu e obligatoriu @JsonProperty aici (e un singur cuvânt), dar e ok să rămână implicit
     private String make;
 
     @NotEmpty(message = "Model is required")

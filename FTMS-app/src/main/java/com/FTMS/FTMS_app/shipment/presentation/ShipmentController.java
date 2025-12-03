@@ -36,12 +36,12 @@ public class ShipmentController {
             @PathVariable Long id,
             @RequestParam Long driverId,
             @RequestParam Long vehicleId) {
-        // Exemplu apel: PUT /api/v1/shipments/1/assign?driverId=5&vehicleId=10
+
         Shipment assignedShipment = shipmentService.assignShipment(id, driverId, vehicleId);
         return ResponseEntity.ok(assignedShipment);
     }
 
-    // --- MODIFICAT AICI: Returnăm Shipment în loc de Void ---
+
     @PutMapping("/{id}/cancel")
     public ResponseEntity<Shipment> cancelShipment(@PathVariable Long id) {
         Shipment canceledShipment = shipmentService.cancelShipment(id);
@@ -54,7 +54,6 @@ public class ShipmentController {
             @PathVariable Long id,
             @PathVariable ShipmentStatus newStatus) {
 
-        // Validăm că nu se încearcă setarea directă a statusurilor finale prin acest endpoint
         if (newStatus == ShipmentStatus.PICKED_UP || newStatus == ShipmentStatus.IN_TRANSIT) {
             Shipment updatedShipment = shipmentService.updateShipmentStatus(id, newStatus);
             return ResponseEntity.ok(updatedShipment);

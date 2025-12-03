@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController // Spune Spring-ului că această clasă gestionează cereri HTTP
-@RequestMapping("/api/v1/fleet") // Prefixul comun pentru toate rutele
+@RestController
+@RequestMapping("/api/v1/fleet")
 public class FleetController {
 
     private final FleetService fleetService;
@@ -27,7 +27,7 @@ public class FleetController {
 
     @PostMapping("/vehicles")
     public ResponseEntity<Vehicle> addVehicle(@Valid @RequestBody CreateVehicleRequest request) {
-        // @Valid -> Activează validările din DTO (@NotEmpty, @Min etc.)
+
         Vehicle newVehicle = fleetService.addVehicle(request);
         return new ResponseEntity<>(newVehicle, HttpStatus.CREATED);
     }
